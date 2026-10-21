@@ -92,6 +92,15 @@
             margin-top: -1px;
         }
 
+        /* 1. Uklonjen pokazivač (strelica) sa staklastog popupa */
+        .leaflet-popup-tip-container {
+            display: none !important;
+        }
+        
+        .leaflet-popup {
+            margin-bottom: 25px !important; /* Blago odvajanje od same bele table ispod */
+        }
+
         .leaflet-popup-content-wrapper {
             background: rgba(20, 20, 20, 0.85) !important;
             backdrop-filter: blur(12px);
@@ -102,15 +111,11 @@
             padding: 5px !important;
         }
 
-        .leaflet-popup-tip {
-            background: rgba(20, 20, 20, 0.85) !important;
-        }
-
         .profi-form {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            width: 210px;
+            gap: 12px;
+            width: 230px;
             padding: 8px;
         }
 
@@ -121,24 +126,42 @@
             color: #ffffff;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             padding-bottom: 6px;
+            text-align: center;
         }
 
-        .profi-form label {
-            font-size: 12px;
-            color: #a0aec0;
-            margin-bottom: -6px;
-            font-weight: 600;
+        /* 2. Stilovi za "dva odvojena dela" table */
+        .board-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .board-section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #3498db;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 4px;
         }
 
         .profi-input {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 9px 12px;
+            border-radius: 6px;
+            padding: 8px 10px;
             color: white;
             font-size: 13px;
             outline: none;
             transition: border-color 0.2s;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .profi-input::placeholder {
@@ -152,7 +175,7 @@
 
         textarea.profi-input {
             resize: vertical;
-            min-height: 60px;
+            min-height: 55px;
         }
 
         .profi-submit-btn {
@@ -166,7 +189,6 @@
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3);
             transition: opacity 0.2s, transform 0.1s;
-            margin-top: 5px;
         }
 
         .profi-submit-btn:hover {
@@ -177,7 +199,6 @@
             transform: scale(0.98);
         }
 
-        /* Oznaka da je admin ulogovan */
         #admin-badge {
             position: absolute;
             top: 15px;
@@ -191,7 +212,7 @@
             font-weight: bold;
             z-index: 1000;
             box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
-            display: none; /* Skriveno po defaultu */
+            display: none;
         }
     </style>
 </head>
@@ -218,11 +239,9 @@
         const db = getDatabase(app);
         const mestaRef = ref(db, 'biracka_mesta');
 
-        // Provera da li je URL "tajni" (da li sadrži ?admin=da)
         const urlParams = new URLSearchParams(window.location.search);
         const isAdmin = urlParams.get('admin') === 'da';
 
-        // Ako je admin, prikaži crvenu oznaku na vrhu ekrana
         if (isAdmin) {
             document.getElementById('admin-badge').style.display = 'block';
         }
@@ -237,7 +256,36 @@
 
         var aktivniMarkeri = {};
 
-        // Slušanje iz Firebase baze - OVO SVI VIDE
+        // 3. Automatsko gašenje posle 1 minuta (60000ms) neaktivnosti (samo za NE-admine)
+        let tajmerNeaktivnosti;
+
+        function resetujTajmer() {
+            if (isAdmin) return; // Adminima se ne gasi tajmerom
+            clearTimeout(tajmerNeaktivnosti);
+            tajmerNeaktivnosti = setTimeout(() => {
+                map.closePopup(); // Gasi prozor nakon minut
+            }, 60000);
+        }
+
+        // Pratimo interakcije u otvorenom prozoru da osvežimo tajmer
+        map.on('popupopen', function(e) {
+            if (!isAdmin) {
+                let popupEl = e.popup.getElement();
+                if (popupEl) {
+                    popupEl.addEventListener('mousemove', resetujTajmer);
+                    popupEl.addEventListener('keypress', resetujTajmer);
+                    popupEl.addEventListener('click', resetujTajmer);
+                    popupEl.addEventListener('input', resetujTajmer);
+                }
+                resetujTajmer(); // Pokreni tajmer čim se otvori
+            }
+        });
+
+        // Brisemo tajmer ako se prozor ručno zatvori
+        map.on('popupclose', function() {
+            clearTimeout(tajmerNeaktivnosti);
+        });
+
         onValue(mestaRef, (snapshot) => {
             for (let id in aktivniMarkeri) {
                 map.removeLayer(aktivniMarkeri[id]);
@@ -269,15 +317,14 @@
 
                 var marker = L.marker([mesto.lat, mesto.lng], { icon: pinIcon }).addTo(map);
                 
-                // Klik na postavljenu tablu (SVI mogu da kliknu i unesu PIN)
                 marker.on('click', function(e) {
                     L.DomEvent.stopPropagation(e); 
 
                     let popupContent = `
                         <div class="profi-form" id="popup-content-${id}">
                             <h4>Zaštićen pristup</h4>
-                            <input type="password" id="pin-input-${id}" class="profi-input" placeholder="Unesite kod..." maxlength="6">
-                            <button class="profi-submit-btn" onclick="proveriPin('${id}')">Otključaj</button>
+                            <input type="password" id="pin-input-${id}" class="profi-input" placeholder="Unesite 6-cifreni kod..." maxlength="6">
+                            <button class="profi-submit-btn" onclick="proveriPin('${id}')">Otključaj Tablu</button>
                         </div>
                     `;
 
@@ -291,19 +338,30 @@
             });
         });
 
-        // Globalne funkcije za sve korisnike (unos PIN-a i podataka)
         window.proveriPin = function(id) {
             let uneseniPin = document.getElementById(`pin-input-${id}`).value;
+            
             if (uneseniPin === '123456') {
+                // Generisanje table podeljene na tačno DVA DELA
                 let noviSadrzaj = `
-                    <h4>Unos Podataka</h4>
-                    <label>Izlaznost (%)</label>
-                    <input type="text" id="izlaznost-${id}" class="profi-input" placeholder="Npr. 45.5%">
-                    <label>Rezultati</label>
-                    <textarea id="rezultati-${id}" class="profi-input" placeholder="Unesite raspored glasova..."></textarea>
-                    <button class="profi-submit-btn" onclick="potvrdiPodatke('${id}')">Potvrdi</button>
+                    <div class="profi-form">
+                        <h4>Ažuriranje Podataka</h4>
+                        
+                        <div class="board-section">
+                            <p class="board-section-title">Deo 1: Izlaznost</p>
+                            <input type="text" id="izlaznost-${id}" class="profi-input" placeholder="Npr. 45.5%">
+                        </div>
+                        
+                        <div class="board-section">
+                            <p class="board-section-title">Deo 2: Rezultati</p>
+                            <textarea id="rezultati-${id}" class="profi-input" placeholder="Unesite raspored glasova..."></textarea>
+                        </div>
+                        
+                        <button class="profi-submit-btn" onclick="potvrdiPodatke('${id}')">Snimi i Potvrdi</button>
+                    </div>
                 `;
                 document.getElementById(`popup-content-${id}`).innerHTML = noviSadrzaj;
+                resetujTajmer(); // Restart tajmera nakon što uspešno otključa
             } else {
                 alert("Netačan kod! Pokušajte ponovo.");
             }
@@ -312,11 +370,11 @@
         window.potvrdiPodatke = function(id) {
             let izlaznost = document.getElementById(`izlaznost-${id}`).value;
             let rezultati = document.getElementById(`rezultati-${id}`).value;
-            alert(`Spremno za snimanje!\nIzlaznost: ${izlaznost}\nRezultati: ${rezultati}`);
-            map.closePopup();
+            alert(`Spremno za slanje u bazu!\n\nIzlaznost: ${izlaznost}\nRezultati: ${rezultati}`);
+            map.closePopup(); // Gasi popup nakon čuvanja
         };
 
-        // KREIRANJE NOVIH MESTA - DOZVOLJENO SAMO ADMINU
+        // ADMIN KREIRANJE NOVIH MESTA
         if (isAdmin) {
             map.on('click', function(e) {
                 var lat = e.latlng.lat;
