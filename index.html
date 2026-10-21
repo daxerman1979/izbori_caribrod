@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dimitrovgrad - Biračka Mesta</title>
+    <title>Caribrodski izbori</title>
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
@@ -63,6 +63,10 @@
         .stat-tab { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #a0aec0; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; font-size: 13px; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; }
         .stat-tab:hover { background: rgba(255,255,255,0.1); color: white; }
         .stat-tab.active-tab { background: #3498db; color: white; border-color: #3498db; box-shadow: 0 0 15px rgba(52, 152, 219, 0.4); }
+        
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .export-btn { background: #27ae60; color: white; border: 1px solid #2ecc71; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 11px; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3); }
+        .export-btn:hover { background: #2ecc71; transform: scale(1.05); }
         .close-stat { background: transparent; border: none; color: white; font-size: 28px; cursor: pointer; line-height: 1; transition: transform 0.2s; }
         .close-stat:hover { transform: scale(1.2); color: #ff4757; }
         
@@ -128,9 +132,13 @@
         <div class="stat-header">
             <div class="stat-tabs">
                 <button class="stat-tab active-tab" onclick="prikaziGlavniTab('izlaznost')" id="main-tab-izlaznost">Izlaznost</button>
-                <button class="stat-tab" onclick="prikaziGlavniTab('rezultati')" id="main-tab-rezultati">Rezultati Stranke</button>
+                <button class="stat-tab" onclick="prikaziGlavniTab('rezultati')" id="main-tab-rezultati">Rezultati izbora</button>
             </div>
-            <button class="close-stat" onclick="toggleStatPanel(false)">&times;</button>
+            
+            <div class="header-actions">
+                <button class="export-btn" onclick="exportujUExcel()">📥 Export u Excel</button>
+                <button class="close-stat" onclick="toggleStatPanel(false)">&times;</button>
+            </div>
         </div>
         
         <div id="stat-content-area" class="theme-orange" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
@@ -157,9 +165,9 @@
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
         var aktivniMarkeri = {};
-        var globalnaMestaData = {}; 
+        window.globalnaMestaData = {}; 
 
-        const politickeListe = [
+        window.politickeListe = [
             "Aleksandar Vučić - Ujedinjena Srbija", "Ivica Dačić - Faktor stabilnosti", "Studentska lista - Studenti pobeđuju",
             "Radim Ljajić - Ljudski", "Savez vojvođanskih Mađara - Dr Balint Pastor", "Usame Zukorlić - Pokret za ujedinjenje",
             "Ruska stranka - Srbija u Briksu - Slobodan Nikolić", "Autentična desnica - Dr Miloš Jovanović", "Evropska Srbija - Marinika Tepić - Zdravko Ponoš",
@@ -177,7 +185,7 @@
             const data = snapshot.val();
             if (!data) return;
 
-            globalnaMestaData = data; 
+            window.globalnaMestaData = data; 
             azurirajStatistiku(); 
 
             Object.keys(data).forEach((id) => {
@@ -212,18 +220,16 @@
                             <button class="profi-submit-btn" onclick="proveriPin('${id}')">Otključaj Tablu</button>
                         </div>`;
                     
-                    // closeOnClick: false sprečava slučajno gašenje pored table
                     L.popup({ closeOnClick: false }).setLatLng(marker.getLatLng()).setContent(popupContent).openOn(map);
                 });
                 aktivniMarkeri[id] = marker;
             });
         });
 
-        // 1. MODIFIKOVANA PROVERA PIN-A (PROVERAVA LOKALNI PIN MESTA)
         window.proveriPin = function(id) {
             let uneseniPin = document.getElementById(`pin-input-${id}`).value;
-            let mesto = globalnaMestaData[id];
-            let tacanPin = mesto.pin ? mesto.pin : '123456'; // Fallback ako staro mesto nema PIN
+            let mesto = window.globalnaMestaData[id];
+            let tacanPin = mesto.pin ? mesto.pin : '123456';
             
             if (uneseniPin === tacanPin) { 
                 prikaziGlavniMeni(id); 
@@ -233,7 +239,7 @@
         };
 
         window.prikaziGlavniMeni = function(id) {
-            let mesto = globalnaMestaData[id];
+            let mesto = window.globalnaMestaData[id];
             let sadrzaj = `
                 <div class="profi-form">
                     <h4>Kontrolna Tabla</h4>
@@ -257,7 +263,7 @@
         };
 
         window.prikaziIzlaznost = function(id) {
-            let mesto = globalnaMestaData[id];
+            let mesto = window.globalnaMestaData[id];
             let sadrzaj = `
                 <div class="profi-form">
                     <h4>Unos Izlaznosti</h4>
@@ -290,9 +296,9 @@
         };
 
         window.prikaziRezultate = function(id) {
-            let mesto = globalnaMestaData[id];
+            let mesto = window.globalnaMestaData[id];
             let r = mesto.rezultati || {};
-            let inps = politickeListe.map((ime, idx) => `
+            let inps = window.politickeListe.map((ime, idx) => `
                 <div class="rezultat-red">
                     <label>${idx + 1}. ${ime}</label>
                     <input type="number" id="rez-${id}-${idx}" class="profi-input" value="${r[idx] !== undefined ? r[idx] : ''}">
@@ -311,7 +317,7 @@
 
         window.sacuvajRezultate = function(id) {
             let r = {};
-            politickeListe.forEach((_, idx) => {
+            window.politickeListe.forEach((_, idx) => {
                 let v = document.getElementById(`rez-${id}-${idx}`).value;
                 if (v !== '') r[idx] = parseInt(v);
             });
@@ -320,7 +326,6 @@
             });
         };
 
-        // ADMIN CREATION SA POLJEM ZA PIN
         if (isAdmin) {
             map.on('click', function(e) {
                 var lat = e.latlng.lat; var lng = e.latlng.lng;
@@ -339,16 +344,14 @@
                         var n = document.getElementById('input-naziv').value.trim();
                         var b = document.getElementById('input-broj').value.trim();
                         var p = document.getElementById('input-pin').value.trim();
-                        
-                        if(!n || !b || !p) return alert("Popunite sva 3 polja (uključujući šifru)!");
-                        
+                        if(!n || !b || !p) return alert("Popunite sva 3 polja!");
                         push(mestaRef, { lat: lat, lng: lng, naziv: n, broj: b, pin: p }).then(() => map.closePopup());
                     };
                 }, 100);
             });
         }
 
-        // --- STATISTIKA LOGIKA ---
+        // --- STATISTIKA I EKSPORT ---
         let trenutniGlavniTab = 'izlaznost';
         let trenutniPodTab = 'sve';
 
@@ -374,32 +377,71 @@
             azurirajStatistiku();
         }
 
+        window.exportujUExcel = function() {
+            if(!window.globalnaMestaData || Object.keys(window.globalnaMestaData).length === 0) return alert("Nema podataka za eksport!");
+            
+            let table = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body><table border="1">`;
+            table += `<tr><th>Biračko mesto</th><th>Upisani birači</th><th>Izašlo birača</th><th>Izlaznost (%)</th><th>Važeći glasovi</th>`;
+            window.politickeListe.forEach(l => { table += `<th>${l}</th>`; });
+            table += `</tr>`;
+            
+            let sortiranaMestaKeys = Object.keys(window.globalnaMestaData).sort((a,b) => parseInt(window.globalnaMestaData[a].broj) - parseInt(window.globalnaMestaData[b].broj));
+            let totUpisano = 0, totIzaslo = 0, totVazeci = 0;
+            let totListe = new Array(window.politickeListe.length).fill(0);
+            
+            sortiranaMestaKeys.forEach(id => {
+                let m = window.globalnaMestaData[id];
+                let upisano = m.ukupan_broj || 0; let izaslo = m.izaslo || 0;
+                let izlaznost = upisano > 0 ? ((izaslo/upisano)*100).toFixed(2) : 0;
+                let vazeci = 0;
+                let glasoviHtml = "";
+                
+                window.politickeListe.forEach((_, idx) => {
+                    let g = (m.rezultati && m.rezultati[idx]) ? parseInt(m.rezultati[idx]) : 0;
+                    vazeci += g; totListe[idx] += g;
+                    glasoviHtml += `<td>${g}</td>`;
+                });
+                
+                totUpisano += upisano; totIzaslo += izaslo; totVazeci += vazeci;
+                table += `<tr><td>${m.broj}. ${m.naziv}</td><td>${upisano}</td><td>${izaslo}</td><td>${izlaznost}%</td><td>${vazeci}</td>${glasoviHtml}</tr>`;
+            });
+            
+            let totIzlaznost = totUpisano > 0 ? ((totIzaslo/totUpisano)*100).toFixed(2) : 0;
+            table += `<tr><th>UKUPNO CARIBROD</th><th>${totUpisano}</th><th>${totIzaslo}</th><th>${totIzlaznost}%</th><th>${totVazeci}</th>`;
+            totListe.forEach(g => { table += `<th>${g}</th>`; });
+            table += `</tr></table></body></html>`;
+            
+            let blob = new Blob([table], { type: 'application/vnd.ms-excel' });
+            let url = URL.createObjectURL(blob);
+            let link = document.createElement("a");
+            link.href = url;
+            link.download = "Caribrodski_Izbori_Rezultati.xls";
+            link.click();
+        };
+
         window.azurirajStatistiku = function() {
             let area = document.getElementById('stat-content-area');
-            if(!globalnaMestaData || Object.keys(globalnaMestaData).length === 0) { 
+            if(!window.globalnaMestaData || Object.keys(window.globalnaMestaData).length === 0) { 
                 area.innerHTML = "<p class='empty-state'>Nema unetih podataka u bazi.</p>"; return; 
             }
 
-            let sortiranaMestaKeys = Object.keys(globalnaMestaData).sort((a,b) => parseInt(globalnaMestaData[a].broj) - parseInt(globalnaMestaData[b].broj));
+            let sortiranaMestaKeys = Object.keys(window.globalnaMestaData).sort((a,b) => parseInt(window.globalnaMestaData[a].broj) - parseInt(window.globalnaMestaData[b].broj));
 
             let opstinaUpisano = 0; let opstinaIzaslo = 0;
-            let opstinaZbirGlasova = new Array(politickeListe.length).fill(0);
             let opstinaVazeciGlasovi = 0;
 
             sortiranaMestaKeys.forEach(id => {
-                let m = globalnaMestaData[id];
+                let m = window.globalnaMestaData[id];
                 if (m.ukupan_broj) opstinaUpisano += parseInt(m.ukupan_broj);
                 if (m.izaslo) opstinaIzaslo += parseInt(m.izaslo);
                 if (m.rezultati) {
                     Object.keys(m.rezultati).forEach(idx => {
-                        let g = parseInt(m.rezultati[idx]) || 0;
-                        opstinaZbirGlasova[idx] += g;
-                        opstinaVazeciGlasovi += g;
+                        opstinaVazeciGlasovi += parseInt(m.rezultati[idx]) || 0;
                     });
                 }
             });
 
-            let topHtml = `<div class="opstina-naslov"><div class="live-dot"></div> UŽIVO ZBIRNO (OPŠTINA)</div>`;
+            let topHtml = `<div class="opstina-naslov"><div class="live-dot"></div> UŽIVO ZBIRNO (OPŠTINA CARIBROD)</div>`;
             
             if (trenutniGlavniTab === 'izlaznost') {
                 let totalProc = opstinaUpisano > 0 ? ((opstinaIzaslo / opstinaUpisano) * 100).toFixed(1) : 0;
@@ -421,7 +463,7 @@
             let subTabsHtml = `<div class="sub-tabs-container">
                 <button class="sub-tab ${trenutniPodTab === 'sve' ? 'active' : ''}" onclick="postaviPodTab('sve')">Sva biračka mesta</button>`;
             sortiranaMestaKeys.forEach(id => {
-                let m = globalnaMestaData[id];
+                let m = window.globalnaMestaData[id];
                 subTabsHtml += `<button class="sub-tab ${trenutniPodTab === id ? 'active' : ''}" onclick="postaviPodTab('${id}')">${m.broj}. ${m.naziv}</button>`;
             });
             subTabsHtml += `</div>`;
@@ -432,7 +474,7 @@
             if (trenutniGlavniTab === 'izlaznost') {
                 let redniBroj = 0;
                 mestaZaPrikaz.forEach(id => {
-                    let m = globalnaMestaData[id]; let u = m.ukupan_broj || 0; let i = m.izaslo || 0;
+                    let m = window.globalnaMestaData[id]; let u = m.ukupan_broj || 0; let i = m.izaslo || 0;
                     if(u > 0) {
                         let p = ((i / u) * 100).toFixed(1);
                         detailsHtml += `
@@ -446,11 +488,11 @@
                 });
                 if(redniBroj === 0) detailsHtml += `<p class="empty-state">Nema unetih podataka o izlaznosti za izabrani pregled.</p>`;
             } else {
-                let lokalniGlasovi = new Array(politickeListe.length).fill(0);
+                let lokalniGlasovi = new Array(window.politickeListe.length).fill(0);
                 let lokalniVazeci = 0;
 
                 mestaZaPrikaz.forEach(id => {
-                    let rez = globalnaMestaData[id].rezultati;
+                    let rez = window.globalnaMestaData[id].rezultati;
                     if (rez) {
                         Object.keys(rez).forEach(idx => {
                             let g = parseInt(rez[idx]) || 0;
@@ -463,13 +505,13 @@
                 if (lokalniVazeci === 0) {
                     detailsHtml += `<p class="empty-state">Nema unetih rezultata glasanja za izabrani pregled.</p>`;
                 } else {
-                    let stranke = politickeListe.map((ime, idx) => {
+                    let stranke = window.politickeListe.map((ime, idx) => {
                         let g = lokalniGlasovi[idx];
                         let p = lokalniVazeci > 0 ? ((g / lokalniVazeci) * 100).toFixed(2) : 0;
                         return { ime, broj: idx + 1, glasovi: g, procenat: parseFloat(p) };
                     }).filter(s => s.glasovi > 0).sort((a,b) => b.glasovi - a.glasovi);
 
-                    let naslovReza = trenutniPodTab === 'sve' ? "Zbirno glasanje - Sva mesta" : `Rezultati - ${globalnaMestaData[trenutniPodTab].naziv}`;
+                    let naslovReza = trenutniPodTab === 'sve' ? "Zbirno glasanje - Sva mesta" : `Rezultati - ${window.globalnaMestaData[trenutniPodTab].naziv}`;
                     detailsHtml += `<p style="text-align:center; color:#a0aec0; font-size:12px; font-weight:bold; margin-top:0;">${naslovReza} (${lokalniVazeci} glasova)</p>`;
 
                     let redniBroj = 0;
@@ -488,7 +530,6 @@
                 }
             }
             detailsHtml += `</div>`;
-
             area.innerHTML = topHtml + subTabsHtml + detailsHtml;
         }
     </script>
