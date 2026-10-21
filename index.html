@@ -13,14 +13,36 @@
     <style>
         html, body { margin: 0; padding: 0; height: 100%; width: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow: hidden; }
         #map { width: 100%; height: 100vh; background: #e5e5e5; }
-        .custom-transparent-icon { background: transparent !important; border: none !important; }
+        
+        /* FIX ZA ZUMIRANJE: Fiksiranje nulte veličine */
+        .custom-transparent-icon { 
+            background: transparent !important; 
+            border: none !important; 
+            width: 0 !important; 
+            height: 0 !important; 
+            margin: 0 !important; 
+            padding: 0 !important; 
+            overflow: visible !important;
+        }
 
-        .map-pin-container { position: absolute; bottom: 0; left: 0; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.25)); z-index: 1000; cursor: pointer; }
+        .map-pin-container { 
+            position: absolute; 
+            top: 0; /* FIX: Umesto bottom: 0 */
+            left: 0; 
+            transform: translate(-50%, -100%); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.25)); 
+            z-index: 1000; 
+            cursor: pointer; 
+        }
+
         .map-pin-container:hover .map-board { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
 
         .map-board { background: #ffffff; border-radius: 8px; padding: 8px 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 90px; max-width: 220px; transition: all 0.2s ease; position: relative; }
         
-        /* NOVO: Poboljšan i veći živi bedž za izlaznost iznad table */
+        /* Živi bedž za izlaznost iznad table */
         .live-turnout { background: #f39c12; color: white; font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 12px; margin-bottom: 4px; box-shadow: 0 2px 8px rgba(243, 156, 18, 0.5); display: flex; align-items: center; gap: 5px; white-space: nowrap; }
         
         .board-title { font-size: 13px; font-weight: 800; color: #1e293b; text-align: center; line-height: 1.2; }
@@ -40,9 +62,7 @@
         .profi-input { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 10px; color: white; font-size: 13px; outline: none; width: 100%; box-sizing: border-box; }
         .profi-input:focus { border-color: #3498db; background: rgba(255, 255, 255, 0.12); }
         
-        /* NOVO: Popravka za padajuće liste (vreme) da se vide brojevi */
         select.profi-input option { background-color: #1e293b; color: white; font-weight: bold; }
-        
         .profi-form label { font-size: 11px; color: #a0aec0; margin-bottom: -6px; font-weight: 600; line-height: 1.2; }
 
         .rezultati-lista { max-height: 220px; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 8px; }
@@ -73,7 +93,7 @@
         .pulse-dot { width: 8px; height: 8px; background: #2ecc71; border-radius: 50%; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); } 100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); } }
 
-        /* NOVO: Filter meni za biračka mesta */
+        /* Filter meni za biračka mesta */
         .stat-filter-container { padding: 10px 20px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.05); }
         .stat-filter-select { width: 100%; padding: 8px; border-radius: 8px; background: #1e293b; color: white; border: 1px solid rgba(255,255,255,0.2); outline: none; font-weight: bold; font-size: 14px; }
 
@@ -169,7 +189,6 @@
 
             globalnaMestaData = data; 
 
-            // Osvežavanje padajuće liste filtera u panelu
             let filterSelect = document.getElementById('stat-mesto-filter');
             let trenutniFilter = filterSelect ? filterSelect.value : 'sve';
             let optionsHtml = `<option value="sve">Zbirno (Cela opština)</option>`;
@@ -181,10 +200,10 @@
             
             if(filterSelect) {
                 filterSelect.innerHTML = optionsHtml;
-                filterSelect.value = trenutniFilter; // Zadrži izabranu opciju
+                filterSelect.value = trenutniFilter; 
             }
 
-            azurirajStatistiku(); // Automatsko osvežavanje panela
+            azurirajStatistiku(); 
 
             Object.keys(data).forEach((id) => {
                 let mesto = data[id];
@@ -287,7 +306,6 @@
             update(ref(db, 'biracka_mesta/' + id), { izaslo: parseInt(izaslo), vreme_update: `${sat}:${minut}` })
                 .then(() => {
                     prikaziGlavniMeni(id);
-                    // Automatski fokusiraj panel na to mesto
                     document.getElementById('stat-mesto-filter').value = id; 
                     toggleStatPanel(true); 
                 });
@@ -330,12 +348,13 @@
             update(ref(db, 'biracka_mesta/' + id), { rezultati: rezultatiZaBazu })
                 .then(() => {
                     prikaziGlavniMeni(id);
-                    document.getElementById('stat-mesto-filter').value = id; // Fokus na mesto
+                    document.getElementById('stat-mesto-filter').value = id; 
                     prikaziStatTab('rezultati');
                     toggleStatPanel(true);
                 });
         };
 
+        // ADMIN CREATION
         if (isAdmin) {
             map.on('click', function(e) {
                 var lat = e.latlng.lat; var lng = e.latlng.lng;
@@ -359,6 +378,7 @@
             });
         }
 
+        // STATISTIKA PANEL
         window.toggleStatPanel = function(otvori) {
             let p = document.getElementById('stat-panel');
             if(otvori) p.classList.add('otvoren'); else p.classList.remove('otvoren');
