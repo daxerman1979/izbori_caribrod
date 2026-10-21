@@ -23,51 +23,73 @@
         #map {
             width: 100%;
             height: 100vh;
-            background: #1a1a1a;
+            background: #e5e5e5;
         }
 
-        /* Profi tabla sa trouglićem na dnu */
+        /* Uklanjamo fabrička Leaflet ograničenja koja su pravila "oblak" */
+        .custom-transparent-icon {
+            background: transparent !important;
+            border: none !important;
+        }
+
+        /* Kontejner same table */
         .map-pin-container {
-            position: relative;
+            position: absolute;
+            bottom: 0;
+            left: 0;
             transform: translate(-50%, -100%);
             display: flex;
             flex-direction: column;
             align-items: center;
-            white-space: nowrap;
+            /* Drop-shadow stvara senku oko celog oblika (i table i trougla) */
+            filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.25));
+            z-index: 1000;
         }
 
+        /* Glavna tabla */
         .map-board {
             background: #ffffff;
-            border: 2px solid #2c3e50;
-            border-radius: 8px;
-            padding: 6px 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 8px 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2px;
+            gap: 6px;
+            min-width: 80px;
+            max-width: 220px; /* Ako je ime predugačko, preći će u novi red umesto da ispadne */
         }
 
+        /* Naslov na tabli */
         .board-title {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
-            color: #2c3e50;
+            color: #1e293b;
+            text-align: center;
+            white-space: normal; /* Dozvoljava tekstu da predje u drugi red ako treba */
+            word-wrap: break-word;
+            line-height: 1.2;
         }
 
+        /* Broj na tabli */
         .board-number {
             font-size: 11px;
-            color: #e74c3c;
-            font-weight: 600;
+            color: #ef4444; /* Fina crvena boja */
+            font-weight: 700;
+            background: #fee2e2; /* Svetlo crvena pozadina bedža */
+            padding: 2px 10px;
+            border-radius: 12px;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
         }
 
-        /* Mali trouglić (strellica) nadole ispod table */
+        /* Trougao na dnu table koji pokazuje tačnu lokaciju */
         .map-triangle {
             width: 0;
             height: 0;
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            border-top: 8px solid #2c3e50;
-            margin-top: -1px;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid #ffffff;
+            margin-top: -1px; /* Spaja trougao savršeno sa tablom bez proreza */
         }
 
         /* Staklasti prozor za unos (popup) */
@@ -166,7 +188,6 @@
         const db = getDatabase(app);
         const mestaRef = ref(db, 'biracka_mesta');
 
-        // Inicijalizacija mape centrirane na Dimitrovgrad
         var map = L.map('map', { zoomControl: false }).setView([43.0186, 22.7447], 14);
 
         L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -190,7 +211,6 @@
             Object.keys(data).forEach((id) => {
                 let mesto = data[id];
 
-                // Kreiranje table sa nazivom gore, brojem ispod i trouglićem na dnu
                 var pinHtml = `
                     <div class="map-pin-container">
                         <div class="map-board">
@@ -201,8 +221,9 @@
                     </div>
                 `;
 
+                // Dodata je klasa 'custom-transparent-icon' koja gasi fabričke kockice i senke Leaflet-a
                 var pinIcon = L.divIcon({
-                    className: 'custom-pin-icon',
+                    className: 'custom-transparent-icon',
                     html: pinHtml,
                     iconSize: [0, 0],
                     iconAnchor: [0, 0]
