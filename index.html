@@ -133,7 +133,6 @@
             <button class="close-stat" onclick="toggleStatPanel(false)">&times;</button>
         </div>
         
-        <!-- Dinamički sadržaj panela -->
         <div id="stat-content-area" class="theme-orange" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
             <!-- Generiše se iz JS -->
         </div>
@@ -209,20 +208,28 @@
                     let popupContent = `
                         <div class="profi-form" id="popup-content-${id}">
                             <h4>Zaštićen pristup</h4>
-                            <input type="password" id="pin-input-${id}" class="profi-input" placeholder="Unesite 6-cifreni kod..." maxlength="6">
+                            <input type="password" id="pin-input-${id}" class="profi-input" placeholder="Unesite kod za ovo mesto..." maxlength="10">
                             <button class="profi-submit-btn" onclick="proveriPin('${id}')">Otključaj Tablu</button>
                         </div>`;
                     
-                    // closeOnClick: false osigurava da se ne gasi na klik pored table, ali se GASE ostale table
+                    // closeOnClick: false sprečava slučajno gašenje pored table
                     L.popup({ closeOnClick: false }).setLatLng(marker.getLatLng()).setContent(popupContent).openOn(map);
                 });
                 aktivniMarkeri[id] = marker;
             });
         });
 
-        // POPUP UNOS PODATAKA
+        // 1. MODIFIKOVANA PROVERA PIN-A (PROVERAVA LOKALNI PIN MESTA)
         window.proveriPin = function(id) {
-            if (document.getElementById(`pin-input-${id}`).value === '123456') { prikaziGlavniMeni(id); } else { alert("Netačan kod!"); }
+            let uneseniPin = document.getElementById(`pin-input-${id}`).value;
+            let mesto = globalnaMestaData[id];
+            let tacanPin = mesto.pin ? mesto.pin : '123456'; // Fallback ako staro mesto nema PIN
+            
+            if (uneseniPin === tacanPin) { 
+                prikaziGlavniMeni(id); 
+            } else { 
+                alert("Netačan kod za ovo biračko mesto!"); 
+            }
         };
 
         window.prikaziGlavniMeni = function(id) {
@@ -246,7 +253,6 @@
         window.sacuvajUkupanBroj = function(id) {
             let b = document.getElementById(`ukupan-broj-${id}`).value;
             if(!b) return;
-            // Snima tiho, bez alert-a
             update(ref(db, 'biracka_mesta/' + id), { ukupan_broj: parseInt(b) });
         };
 
@@ -267,7 +273,7 @@
                     </div>
                     <div class="btn-row" style="margin-top: 5px;">
                         <button class="profi-submit-btn btn-nazad" onclick="prikaziGlavniMeni('${id}')">Nazad</button>
-                        <button class="profi-submit-btn" onclick="sacuvajIzlaznost('${id}')">Potvrdi</button>
+                        <button class="profi-submit-btn" onclick="sacuvajIzlaznost('${id}')">Snimi</button>
                     </div>
                 </div>`;
             document.getElementById(`popup-content-${id}`).innerHTML = sadrzaj;
@@ -278,7 +284,6 @@
             let s = document.getElementById(`vreme-sat-${id}`).value;
             let m = document.getElementById(`vreme-minut-${id}`).value;
             if(!i) return;
-            // Snima tiho i odmah vraća u glavni meni, te pali panel
             update(ref(db, 'biracka_mesta/' + id), { izaslo: parseInt(i), vreme_update: `${s}:${m}` }).then(() => {
                 prikaziGlavniMeni(id); window.postaviPodTab(id); prikaziGlavniTab('izlaznost'); toggleStatPanel(true);
             });
@@ -298,7 +303,7 @@
                     <div class="rezultati-lista">${inps}</div>
                     <div class="btn-row" style="margin-top: 8px;">
                         <button class="profi-submit-btn btn-nazad" onclick="prikaziGlavniMeni('${id}')">Nazad</button>
-                        <button class="profi-submit-btn" onclick="sacuvajRezultate('${id}')">Sačuvaj</button>
+                        <button class="profi-submit-btn" onclick="sacuvajRezultate('${id}')">Snimi</button>
                     </div>
                 </div>`;
             document.getElementById(`popup-content-${id}`).innerHTML = sadrzaj;
@@ -310,12 +315,12 @@
                 let v = document.getElementById(`rez-${id}-${idx}`).value;
                 if (v !== '') r[idx] = parseInt(v);
             });
-            // Snima tiho i pali panel
             update(ref(db, 'biracka_mesta/' + id), { rezultati: r }).then(() => {
                 prikaziGlavniMeni(id); window.postaviPodTab(id); prikaziGlavniTab('rezultati'); toggleStatPanel(true);
             });
         };
 
+        // ADMIN CREATION SA POLJEM ZA PIN
         if (isAdmin) {
             map.on('click', function(e) {
                 var lat = e.latlng.lat; var lng = e.latlng.lng;
@@ -323,7 +328,8 @@
                     <div class="profi-form">
                         <h4>Novo Biračko Mesto</h4>
                         <input type="text" id="input-naziv" class="profi-input" placeholder="Naziv">
-                        <input type="text" id="input-broj" class="profi-input" placeholder="Broj">
+                        <input type="text" id="input-broj" class="profi-input" placeholder="Broj mesta">
+                        <input type="text" id="input-pin" class="profi-input" placeholder="Šifra za pristup (npr. 8844)">
                         <button id="save-btn" class="profi-submit-btn">Postavi tablu</button>
                     </div>`;
                 L.popup({ closeOnClick: false }).setLatLng([lat, lng]).setContent(formHtml).openOn(map);
@@ -332,7 +338,11 @@
                     if(btn) btn.onclick = function() {
                         var n = document.getElementById('input-naziv').value.trim();
                         var b = document.getElementById('input-broj').value.trim();
-                        if(n && b) push(mestaRef, { lat: lat, lng: lng, naziv: n, broj: b }).then(() => map.closePopup());
+                        var p = document.getElementById('input-pin').value.trim();
+                        
+                        if(!n || !b || !p) return alert("Popunite sva 3 polja (uključujući šifru)!");
+                        
+                        push(mestaRef, { lat: lat, lng: lng, naziv: n, broj: b, pin: p }).then(() => map.closePopup());
                     };
                 }, 100);
             });
