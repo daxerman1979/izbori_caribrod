@@ -14,37 +14,12 @@
         html, body { margin: 0; padding: 0; height: 100%; width: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow: hidden; }
         #map { width: 100%; height: 100vh; background: #e5e5e5; }
         
-        /* FIX ZA ZUMIRANJE: Fiksiranje nulte veličine */
-        .custom-transparent-icon { 
-            background: transparent !important; 
-            border: none !important; 
-            width: 0 !important; 
-            height: 0 !important; 
-            margin: 0 !important; 
-            padding: 0 !important; 
-            overflow: visible !important;
-        }
-
-        .map-pin-container { 
-            position: absolute; 
-            top: 0; /* FIX: Umesto bottom: 0 */
-            left: 0; 
-            transform: translate(-50%, -100%); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.25)); 
-            z-index: 1000; 
-            cursor: pointer; 
-        }
-
+        .custom-transparent-icon { background: transparent !important; border: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
+        .map-pin-container { position: absolute; top: 0; left: 0; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.25)); z-index: 1000; cursor: pointer; }
         .map-pin-container:hover .map-board { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
 
         .map-board { background: #ffffff; border-radius: 8px; padding: 8px 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 90px; max-width: 220px; transition: all 0.2s ease; position: relative; }
-        
-        /* Živi bedž za izlaznost iznad table */
         .live-turnout { background: #f39c12; color: white; font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 12px; margin-bottom: 4px; box-shadow: 0 2px 8px rgba(243, 156, 18, 0.5); display: flex; align-items: center; gap: 5px; white-space: nowrap; }
-        
         .board-title { font-size: 13px; font-weight: 800; color: #1e293b; text-align: center; line-height: 1.2; }
         .board-number { font-size: 11px; color: #ef4444; font-weight: 700; background: #fee2e2; padding: 2px 10px; border-radius: 12px; }
         .map-triangle { width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #ffffff; margin-top: -1px; }
@@ -61,7 +36,6 @@
         .board-section { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
         .profi-input { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 10px; color: white; font-size: 13px; outline: none; width: 100%; box-sizing: border-box; }
         .profi-input:focus { border-color: #3498db; background: rgba(255, 255, 255, 0.12); }
-        
         select.profi-input option { background-color: #1e293b; color: white; font-weight: bold; }
         .profi-form label { font-size: 11px; color: #a0aec0; margin-bottom: -6px; font-weight: 600; line-height: 1.2; }
 
@@ -71,7 +45,8 @@
         .rezultat-red { display: flex; flex-direction: column; gap: 4px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); }
         .rezultat-red label { white-space: normal; word-wrap: break-word; color: #ecf0f1; font-size: 11px; margin-bottom: 2px; }
 
-        .profi-submit-btn { background: linear-gradient(135deg, #2ed573, #26af5f); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+        .profi-submit-btn { background: linear-gradient(135deg, #2ed573, #26af5f); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); transition: opacity 0.2s, transform 0.1s; }
+        .profi-submit-btn:hover { opacity: 0.9; }
         .btn-nazad { background: #7f8c8d; }
         .btn-izlaznost { background: linear-gradient(135deg, #f39c12, #d35400); }
         .btn-rezultati { background: linear-gradient(135deg, #3498db, #2980b9); }
@@ -79,34 +54,63 @@
 
         #admin-badge { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: white; padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 1000; display: none; }
 
-        /* Donji panel za Statistiku */
-        #stat-panel { position: fixed; bottom: -70vh; left: 0; width: 100%; height: 60vh; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); z-index: 2000; transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; color: white; }
+        /* PANELI ZA STATISTIKU - PROFI IZGLED */
+        #stat-panel { position: fixed; bottom: -75vh; left: 0; width: 100%; height: 65vh; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.6); z-index: 2000; transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; color: white; }
         #stat-panel.otvoren { bottom: 0; }
-        .stat-header { display: flex; padding: 15px 20px; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); border-top-left-radius: 20px; border-top-right-radius: 20px; align-items: center; justify-content: space-between; }
-        .stat-tabs { display: flex; gap: 10px; }
-        .stat-tab { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
-        .stat-tab.active-tab { background: #3498db; }
-        .close-stat { background: transparent; border: none; color: white; font-size: 24px; cursor: pointer; line-height: 1; }
         
-        /* Svetleći indikator "UŽIVO" */
-        .live-indicator { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: #2ecc71; letter-spacing: 1px; }
+        .stat-header { display: flex; padding: 15px 20px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.08); border-top-left-radius: 20px; border-top-right-radius: 20px; align-items: center; justify-content: space-between; }
+        .stat-tabs { display: flex; gap: 10px; }
+        .stat-tab { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #a0aec0; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .stat-tab:hover { background: rgba(255,255,255,0.1); color: white; }
+        .stat-tab.active-tab { background: #3498db; color: white; border-color: #3498db; box-shadow: 0 0 15px rgba(52, 152, 219, 0.4); }
+        .close-stat { background: transparent; border: none; color: white; font-size: 28px; cursor: pointer; line-height: 1; transition: transform 0.2s; }
+        .close-stat:hover { transform: scale(1.2); color: #ff4757; }
+        
+        .live-indicator { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: #2ecc71; letter-spacing: 1px; background: rgba(46, 204, 113, 0.1); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(46, 204, 113, 0.2); }
         .pulse-dot { width: 8px; height: 8px; background: #2ecc71; border-radius: 50%; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); } 100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); } }
 
-        /* Filter meni za biračka mesta */
-        .stat-filter-container { padding: 10px 20px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .stat-filter-select { width: 100%; padding: 8px; border-radius: 8px; background: #1e293b; color: white; border: 1px solid rgba(255,255,255,0.2); outline: none; font-weight: bold; font-size: 14px; }
+        .stat-filter-container { padding: 12px 20px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .stat-filter-select { width: 100%; padding: 10px; border-radius: 8px; background: #1e293b; color: white; border: 1px solid rgba(255,255,255,0.2); outline: none; font-weight: bold; font-size: 14px; cursor: pointer; transition: border 0.3s; }
+        .stat-filter-select:focus { border-color: #3498db; }
 
-        .stat-content { padding: 20px; overflow-y: auto; flex: 1; }
-        .stat-row { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 15px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        .stat-content { padding: 20px; overflow-y: auto; flex: 1; scroll-behavior: smooth; }
+        
+        /* NOVO: Dashboard Kartice na vrhu */
+        .summary-dashboard { display: flex; gap: 12px; margin-bottom: 25px; }
+        .summary-card { flex: 1; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; }
+        .summary-card h3 { margin: 0; font-size: 22px; color: #ffffff; }
+        .summary-card p { margin: 4px 0 0 0; font-size: 10px; color: #a0aec0; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
+        .card-accent-orange { background: rgba(243, 156, 18, 0.08); border-color: rgba(243, 156, 18, 0.3); }
+        .card-accent-blue { background: rgba(52, 152, 219, 0.08); border-color: rgba(52, 152, 219, 0.3); }
+        .text-orange { color: #f39c12 !important; font-size: 28px !important; }
+        .text-blue { color: #3498db !important; font-size: 28px !important; }
+
+        /* NOVO: Animacije za redove i progres trake */
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fillProgress {
+            0% { width: 0%; }
+            100% { width: var(--target-width); }
+        }
+
+        .stat-row { 
+            background: rgba(255,255,255,0.03); border-radius: 10px; padding: 15px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.08); 
+            opacity: 0; animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+        }
+        .stat-row:hover { background: rgba(255,255,255,0.07); }
         .stat-row-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; font-size: 13px; line-height: 1.3;}
-        .progress-bg { width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; margin-top: 5px; }
-        .progress-fill { height: 100%; width: 0%; transition: width 1s ease-in-out; border-radius: 6px; }
+        
+        .progress-bg { width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; margin-top: 5px; }
+        .progress-fill { height: 100%; width: var(--target-width); animation: fillProgress 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; border-radius: 5px; }
         .bg-orange { background: linear-gradient(90deg, #f39c12, #e67e22); }
         .bg-blue { background: linear-gradient(90deg, #3498db, #2980b9); }
-        .stat-time { font-size: 11px; color: #a0aec0; margin-top: 6px; }
+        .stat-time { font-size: 11px; color: #a0aec0; margin-top: 8px; display: flex; justify-content: space-between; }
 
-        #btn-otvori-stat { position: absolute; bottom: 20px; right: 20px; background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 30px; font-weight: bold; z-index: 1000; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        #btn-otvori-stat { position: absolute; bottom: 20px; right: 20px; background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: none; padding: 12px 20px; border-radius: 30px; font-weight: bold; z-index: 1000; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.2s; }
+        #btn-otvori-stat:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -115,21 +119,19 @@
     <div id="map"></div>
     <button id="btn-otvori-stat" onclick="toggleStatPanel(true)">📊 Uživo Analitika</button>
 
-    <!-- Donji Panel -->
     <div id="stat-panel">
         <div class="stat-header">
             <div class="stat-tabs">
                 <button class="stat-tab active-tab" onclick="prikaziStatTab('izlaznost')" id="tab-izlaznost">Izlaznost</button>
-                <button class="stat-tab" onclick="prikaziStatTab('rezultati')" id="tab-rezultati">Rezultati</button>
+                <button class="stat-tab" onclick="prikaziStatTab('rezultati')" id="tab-rezultati">Rezultati Stranke</button>
             </div>
             <div class="live-indicator"><div class="pulse-dot"></div> UŽIVO</div>
             <button class="close-stat" onclick="toggleStatPanel(false)">&times;</button>
         </div>
         
-        <!-- Filter Meni -->
         <div class="stat-filter-container">
             <select id="stat-mesto-filter" class="stat-filter-select" onchange="azurirajStatistiku()">
-                <option value="sve">Zbirno (Cela opština)</option>
+                <option value="sve">Zbirno (Cela opština Dimitrovgrad)</option>
             </select>
         </div>
 
@@ -191,7 +193,7 @@
 
             let filterSelect = document.getElementById('stat-mesto-filter');
             let trenutniFilter = filterSelect ? filterSelect.value : 'sve';
-            let optionsHtml = `<option value="sve">Zbirno (Cela opština)</option>`;
+            let optionsHtml = `<option value="sve">Zbirno (Cela opština Dimitrovgrad)</option>`;
             
             let sortiranaMestaKeys = Object.keys(data).sort((a,b) => parseInt(data[a].broj) - parseInt(data[b].broj));
             sortiranaMestaKeys.forEach(id => {
@@ -256,7 +258,7 @@
                     <div class="board-section">
                         <label>Broj glasača po spisku</label>
                         <input type="number" id="ukupan-broj-${id}" class="profi-input" placeholder="Ukupan broj..." value="${ukBrojStr}">
-                        <button class="profi-submit-btn" style="padding: 6px; margin-top: 2px;" onclick="sacuvajUkupanBroj('${id}')">Sačuvaj</button>
+                        <button class="profi-submit-btn" style="padding: 6px; margin-top: 2px;" onclick="sacuvajUkupanBroj('${id}')">Sačuvaj broj</button>
                     </div>
                     <div class="btn-row" style="margin-top: 5px;">
                         <button class="profi-submit-btn btn-izlaznost" onclick="prikaziIzlaznost('${id}')">Izlaznost</button>
@@ -270,7 +272,7 @@
             let broj = document.getElementById(`ukupan-broj-${id}`).value;
             if(!broj) return alert("Unesite broj glasača!");
             update(ref(db, 'biracka_mesta/' + id), { ukupan_broj: parseInt(broj) })
-                .then(() => alert("Broj uspešno sačuvan!"));
+                .then(() => alert("Broj birača uspešno sačuvan!"));
         };
 
         window.prikaziIzlaznost = function(id) {
@@ -307,6 +309,7 @@
                 .then(() => {
                     prikaziGlavniMeni(id);
                     document.getElementById('stat-mesto-filter').value = id; 
+                    prikaziStatTab('izlaznost');
                     toggleStatPanel(true); 
                 });
         };
@@ -314,7 +317,6 @@
         window.prikaziRezultate = function(id) {
             let mesto = globalnaMestaData[id];
             let postojeciRezultati = mesto.rezultati || {};
-
             let inputsHtml = politickeListe.map((imeListe, index) => {
                 let brojGlasova = postojeciRezultati[index] !== undefined ? postojeciRezultati[index] : '';
                 return `
@@ -323,16 +325,13 @@
                         <input type="number" id="rez-${id}-${index}" class="profi-input" value="${brojGlasova}" placeholder="Broj glasova">
                     </div>`;
             }).join('');
-
             let sadrzaj = `
                 <div class="profi-form" style="width: 280px;">
                     <h4>Unos Rezultata Stranka</h4>
-                    <div class="rezultati-lista">
-                        ${inputsHtml}
-                    </div>
+                    <div class="rezultati-lista">${inputsHtml}</div>
                     <div class="btn-row" style="margin-top: 8px;">
                         <button class="profi-submit-btn btn-nazad" onclick="prikaziGlavniMeni('${id}')">Nazad</button>
-                        <button class="profi-submit-btn" onclick="sacuvajRezultate('${id}')">Sačuvaj</button>
+                        <button class="profi-submit-btn" onclick="sacuvajRezultate('${id}')">Sačuvaj Rezultate</button>
                     </div>
                 </div>`;
             document.getElementById(`popup-content-${id}`).innerHTML = sadrzaj;
@@ -344,7 +343,6 @@
                 let val = document.getElementById(`rez-${id}-${index}`).value;
                 if (val !== '') { rezultatiZaBazu[index] = parseInt(val); }
             });
-
             update(ref(db, 'biracka_mesta/' + id), { rezultati: rezultatiZaBazu })
                 .then(() => {
                     prikaziGlavniMeni(id);
@@ -354,7 +352,6 @@
                 });
         };
 
-        // ADMIN CREATION
         if (isAdmin) {
             map.on('click', function(e) {
                 var lat = e.latlng.lat; var lng = e.latlng.lng;
@@ -363,7 +360,7 @@
                         <h4>Novo Biračko Mesto</h4>
                         <input type="text" id="input-naziv" class="profi-input" placeholder="Naziv (npr. Dom kulture)">
                         <input type="text" id="input-broj" class="profi-input" placeholder="Broj (npr. 05)">
-                        <button id="save-btn" class="profi-submit-btn">Postavi tablu</button>
+                        <button id="save-btn" class="profi-submit-btn">Postavi tablu na mapu</button>
                     </div>`;
                 L.popup({ closeOnClick: false, autoClose: false }).setLatLng([lat, lng]).setContent(formHtml).openOn(map);
                 setTimeout(() => {
@@ -378,7 +375,6 @@
             });
         }
 
-        // STATISTIKA PANEL
         window.toggleStatPanel = function(otvori) {
             let p = document.getElementById('stat-panel');
             if(otvori) p.classList.add('otvoren'); else p.classList.remove('otvoren');
@@ -399,7 +395,7 @@
             let filterMestoId = document.getElementById('stat-mesto-filter').value;
             
             if(!globalnaMestaData || Object.keys(globalnaMestaData).length === 0) { 
-                container.innerHTML = "<p style='text-align:center'>Nema unetih podataka</p>"; 
+                container.innerHTML = "<p style='text-align:center; color:#a0aec0;'>Trenutno nema unetih biračkih mesta.</p>"; 
                 return; 
             }
 
@@ -407,29 +403,49 @@
 
             if(trenutniTab === 'izlaznost') {
                 let html = ''; let ukupnoGlasaca = 0; let ukupnoIzaslo = 0;
+                let redniBroj = 0;
                 
                 mestaZaPrikaz.forEach(id => {
                     let m = globalnaMestaData[id]; let upisano = m.ukupan_broj || 0; let izaslo = m.izaslo || 0; let procenat = 0;
                     if(upisano > 0) { procenat = ((izaslo / upisano) * 100).toFixed(1); ukupnoGlasaca += upisano; ukupnoIzaslo += izaslo; }
                     
-                    if(filterMestoId === 'sve' || filterMestoId === id) {
+                    if((filterMestoId === 'sve' || filterMestoId === id) && upisano > 0) {
                         html += `
-                            <div class="stat-row">
+                            <div class="stat-row" style="animation-delay: ${redniBroj * 0.05}s">
                                 <div class="stat-row-header"><span>Br. ${m.broj} - ${m.naziv}</span> <span style="color:#f39c12;">${procenat}%</span></div>
-                                <div class="progress-bg"><div class="progress-fill bg-orange" style="width: ${procenat}%"></div></div>
-                                <div class="stat-time">Osveženo: ${m.vreme_update ? m.vreme_update + 'h' : 'Nema unosa'} | Izašlo: ${izaslo}/${upisano}</div>
+                                <div class="progress-bg"><div class="progress-fill bg-orange" style="--target-width: ${procenat}%"></div></div>
+                                <div class="stat-time">
+                                    <span>Izašlo: <b style="color:white">${izaslo} / ${upisano}</b></span>
+                                    <span>Poslednji unos: ${m.vreme_update ? m.vreme_update + 'h' : 'Nema'}</span>
+                                </div>
                             </div>`;
+                        redniBroj++;
                     }
                 });
                 
                 let totalProcenat = ukupnoGlasaca > 0 ? ((ukupnoIzaslo / ukupnoGlasaca) * 100).toFixed(1) : 0;
-                let naslov = filterMestoId === 'sve' ? "Ukupna izlaznost na nivou opštine" : "Izlaznost za izabrano mesto";
                 
-                container.innerHTML = `
-                    <div style="text-align:center; margin-bottom: 20px;">
-                        <h2 style="margin:0; font-size:36px; color:#f39c12;">${totalProcenat}%</h2>
-                        <p style="margin:0; color:#a0aec0; font-size:12px; text-transform:uppercase;">${naslov}</p>
-                    </div> ${html}`;
+                // NOVO: Profi Dashboard Kartice za Izlaznost
+                let dashboardHtml = `
+                    <div class="summary-dashboard">
+                        <div class="summary-card">
+                            <h3>${ukupnoGlasaca}</h3>
+                            <p>Upisanih birača</p>
+                        </div>
+                        <div class="summary-card">
+                            <h3>${ukupnoIzaslo}</h3>
+                            <p>Izašlo na glasanje</p>
+                        </div>
+                        <div class="summary-card card-accent-orange">
+                            <h3 class="text-orange">${totalProcenat}%</h3>
+                            <p>Ukupna Izlaznost</p>
+                        </div>
+                    </div>
+                `;
+                
+                if (html === '') html = `<p style='text-align:center; color:#a0aec0; margin-top:20px;'>Nema prijavljenih podataka o izlaznosti za izabrani filter.</p>`;
+                container.innerHTML = dashboardHtml + html;
+                
             } else {
                 let zbirGlasova = new Array(politickeListe.length).fill(0);
                 let ukupanBrojVazecih = 0;
@@ -458,27 +474,34 @@
 
                 strankeZaPrikaz.sort((a, b) => b.glasovi - a.glasovi);
 
-                let naslovReza = filterMestoId === 'sve' ? "Ukupno obrađeno glasova u opštini:" : "Obrađeno glasova na mestu:";
-                let html = `
-                    <div style="text-align:center; margin-bottom: 20px;">
-                        <p style="margin:0; color:#a0aec0; font-size:12px; text-transform:uppercase;">${naslovReza}</p>
-                        <h3 style="margin:0; color:#3498db; font-size: 24px;">${ukupanBrojVazecih}</h3>
-                    </div>`;
+                // NOVO: Profi Dashboard Kartica za Rezultate
+                let dashboardHtml = `
+                    <div class="summary-dashboard">
+                        <div class="summary-card card-accent-blue">
+                            <h3 class="text-blue">${ukupanBrojVazecih}</h3>
+                            <p>Ukupno prebrojanih i važećih glasova</p>
+                        </div>
+                    </div>
+                `;
 
+                let html = '';
+                let redniBroj = 0;
                 strankeZaPrikaz.forEach(stranka => {
                     if (stranka.glasovi > 0) {
                         html += `
-                            <div class="stat-row">
+                            <div class="stat-row" style="animation-delay: ${redniBroj * 0.05}s">
                                 <div class="stat-row-header">
                                     <span style="flex:1; padding-right:10px;">${stranka.broj}. ${stranka.ime}</span> 
                                     <span style="color:#3498db; font-size:16px;">${stranka.procenat}%</span>
                                 </div>
-                                <div class="progress-bg"><div class="progress-fill bg-blue" style="width: ${stranka.procenat}%"></div></div>
-                                <div class="stat-time">Broj osvojenih glasova: <b style="color:white">${stranka.glasovi}</b></div>
+                                <div class="progress-bg"><div class="progress-fill bg-blue" style="--target-width: ${stranka.procenat}%"></div></div>
+                                <div class="stat-time">Broj osvojenih glasova: <b style="color:white; font-size: 13px;">${stranka.glasovi}</b></div>
                             </div>`;
+                        redniBroj++;
                     }
                 });
-                container.innerHTML = html;
+                
+                container.innerHTML = dashboardHtml + html;
             }
         }
     </script>
