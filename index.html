@@ -92,13 +92,12 @@
             margin-top: -1px;
         }
 
-        /* 1. Uklonjen pokazivač (strelica) sa staklastog popupa */
         .leaflet-popup-tip-container {
             display: none !important;
         }
         
         .leaflet-popup {
-            margin-bottom: 25px !important; /* Blago odvajanje od same bele table ispod */
+            margin-bottom: 25px !important;
         }
 
         .leaflet-popup-content-wrapper {
@@ -109,6 +108,20 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
             border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 5px !important;
+        }
+
+        /* Osiguravamo da je 'X' dugme za gašenje uočljivo na crnoj pozadini */
+        .leaflet-popup-close-button {
+            color: #ffffff !important;
+            font-size: 18px !important;
+            top: 6px !important;
+            right: 10px !important;
+            font-weight: bold !important;
+            transition: color 0.2s;
+        }
+        .leaflet-popup-close-button:hover {
+            color: #ff4757 !important;
+            background: transparent !important;
         }
 
         .profi-form {
@@ -129,7 +142,6 @@
             text-align: center;
         }
 
-        /* 2. Stilovi za "dva odvojena dela" table */
         .board-section {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -256,18 +268,16 @@
 
         var aktivniMarkeri = {};
 
-        // 3. Automatsko gašenje posle 1 minuta (60000ms) neaktivnosti (samo za NE-admine)
         let tajmerNeaktivnosti;
 
         function resetujTajmer() {
-            if (isAdmin) return; // Adminima se ne gasi tajmerom
+            if (isAdmin) return; 
             clearTimeout(tajmerNeaktivnosti);
             tajmerNeaktivnosti = setTimeout(() => {
-                map.closePopup(); // Gasi prozor nakon minut
+                map.closePopup(); 
             }, 60000);
         }
 
-        // Pratimo interakcije u otvorenom prozoru da osvežimo tajmer
         map.on('popupopen', function(e) {
             if (!isAdmin) {
                 let popupEl = e.popup.getElement();
@@ -277,11 +287,10 @@
                     popupEl.addEventListener('click', resetujTajmer);
                     popupEl.addEventListener('input', resetujTajmer);
                 }
-                resetujTajmer(); // Pokreni tajmer čim se otvori
+                resetujTajmer(); 
             }
         });
 
-        // Brisemo tajmer ako se prozor ručno zatvori
         map.on('popupclose', function() {
             clearTimeout(tajmerNeaktivnosti);
         });
@@ -328,7 +337,8 @@
                         </div>
                     `;
 
-                    L.popup()
+                    // FIX: Dodata zabrana gašenja na klik pored table (closeOnClick: false, autoClose: false)
+                    L.popup({ closeOnClick: false, autoClose: false })
                         .setLatLng(marker.getLatLng())
                         .setContent(popupContent)
                         .openOn(map);
@@ -342,7 +352,6 @@
             let uneseniPin = document.getElementById(`pin-input-${id}`).value;
             
             if (uneseniPin === '123456') {
-                // Generisanje table podeljene na tačno DVA DELA
                 let noviSadrzaj = `
                     <div class="profi-form">
                         <h4>Ažuriranje Podataka</h4>
@@ -361,7 +370,7 @@
                     </div>
                 `;
                 document.getElementById(`popup-content-${id}`).innerHTML = noviSadrzaj;
-                resetujTajmer(); // Restart tajmera nakon što uspešno otključa
+                resetujTajmer(); 
             } else {
                 alert("Netačan kod! Pokušajte ponovo.");
             }
@@ -371,10 +380,9 @@
             let izlaznost = document.getElementById(`izlaznost-${id}`).value;
             let rezultati = document.getElementById(`rezultati-${id}`).value;
             alert(`Spremno za slanje u bazu!\n\nIzlaznost: ${izlaznost}\nRezultati: ${rezultati}`);
-            map.closePopup(); // Gasi popup nakon čuvanja
+            map.closePopup(); 
         };
 
-        // ADMIN KREIRANJE NOVIH MESTA
         if (isAdmin) {
             map.on('click', function(e) {
                 var lat = e.latlng.lat;
@@ -389,7 +397,8 @@
                     </div>
                 `;
 
-                L.popup()
+                // FIX: Admin prozor se isto štiti od slučajnog zatvaranja
+                L.popup({ closeOnClick: false, autoClose: false })
                     .setLatLng([lat, lng])
                     .setContent(formHtml)
                     .openOn(map);
