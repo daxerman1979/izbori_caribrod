@@ -110,7 +110,6 @@
             padding: 5px !important;
         }
 
-        /* Osiguravamo da je 'X' dugme za gašenje uočljivo na crnoj pozadini */
         .leaflet-popup-close-button {
             color: #ffffff !important;
             font-size: 18px !important;
@@ -185,9 +184,11 @@
             background: rgba(255, 255, 255, 0.12);
         }
 
-        textarea.profi-input {
-            resize: vertical;
-            min-height: 55px;
+        .profi-form label {
+            font-size: 11px;
+            color: #a0aec0;
+            margin-bottom: -6px;
+            font-weight: 600;
         }
 
         .profi-submit-btn {
@@ -199,7 +200,7 @@
             font-weight: 700;
             font-size: 13px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             transition: opacity 0.2s, transform 0.1s;
         }
 
@@ -209,6 +210,24 @@
 
         .profi-submit-btn:active {
             transform: scale(0.98);
+        }
+
+        .btn-nazad {
+            background: #7f8c8d;
+        }
+        .btn-izlaznost {
+            background: linear-gradient(135deg, #f39c12, #d35400);
+        }
+        .btn-rezultati {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-row > button {
+            flex: 1;
         }
 
         #admin-badge {
@@ -267,7 +286,6 @@
         }).addTo(map);
 
         var aktivniMarkeri = {};
-
         let tajmerNeaktivnosti;
 
         function resetujTajmer() {
@@ -337,7 +355,6 @@
                         </div>
                     `;
 
-                    // FIX: Dodata zabrana gašenja na klik pored table (closeOnClick: false, autoClose: false)
                     L.popup({ closeOnClick: false, autoClose: false })
                         .setLatLng(marker.getLatLng())
                         .setContent(popupContent)
@@ -348,41 +365,97 @@
             });
         });
 
+        // 1. Provera koda
         window.proveriPin = function(id) {
             let uneseniPin = document.getElementById(`pin-input-${id}`).value;
-            
             if (uneseniPin === '123456') {
-                let noviSadrzaj = `
-                    <div class="profi-form">
-                        <h4>Ažuriranje Podataka</h4>
-                        
-                        <div class="board-section">
-                            <p class="board-section-title">Deo 1: Izlaznost</p>
-                            <input type="text" id="izlaznost-${id}" class="profi-input" placeholder="Npr. 45.5%">
-                        </div>
-                        
-                        <div class="board-section">
-                            <p class="board-section-title">Deo 2: Rezultati</p>
-                            <textarea id="rezultati-${id}" class="profi-input" placeholder="Unesite raspored glasova..."></textarea>
-                        </div>
-                        
-                        <button class="profi-submit-btn" onclick="potvrdiPodatke('${id}')">Snimi i Potvrdi</button>
-                    </div>
-                `;
-                document.getElementById(`popup-content-${id}`).innerHTML = noviSadrzaj;
+                prikaziGlavniMeni(id);
                 resetujTajmer(); 
             } else {
                 alert("Netačan kod! Pokušajte ponovo.");
             }
         };
 
-        window.potvrdiPodatke = function(id) {
-            let izlaznost = document.getElementById(`izlaznost-${id}`).value;
-            let rezultati = document.getElementById(`rezultati-${id}`).value;
-            alert(`Spremno za slanje u bazu!\n\nIzlaznost: ${izlaznost}\nRezultati: ${rezultati}`);
-            map.closePopup(); 
+        // 2. GLAVNA TABLA (Meni za navigaciju i ukupan broj birača)
+        window.prikaziGlavniMeni = function(id) {
+            let sadrzaj = `
+                <div class="profi-form">
+                    <h4>Kontrolna Tabla</h4>
+                    
+                    <div class="board-section">
+                        <label>Broj glasača po biračkom spisku</label>
+                        <input type="number" id="ukupan-broj-${id}" class="profi-input" placeholder="Unesite ukupan broj...">
+                        <button class="profi-submit-btn" style="padding: 6px; margin-top: 2px;" onclick="sacuvajUkupanBroj('${id}')">Sačuvaj</button>
+                    </div>
+                    
+                    <div class="btn-row" style="margin-top: 5px;">
+                        <button class="profi-submit-btn btn-izlaznost" onclick="prikaziIzlaznost('${id}')">Izlaznost</button>
+                        <button class="profi-submit-btn btn-rezultati" onclick="prikaziRezultate('${id}')">Rezultati</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById(`popup-content-${id}`).innerHTML = sadrzaj;
         };
 
+        window.sacuvajUkupanBroj = function(id) {
+            let broj = document.getElementById(`ukupan-broj-${id}`).value;
+            if(!broj) return alert("Unesite broj glasača!");
+            alert("Sačuvan ukupan broj: " + broj);
+            // Kasnije ovde ide slanje u Firebase
+        };
+
+        // 3. TABLA ZA IZLAZNOST
+        window.prikaziIzlaznost = function(id) {
+            let sadrzaj = `
+                <div class="profi-form">
+                    <h4>Unos Izlaznosti</h4>
+                    
+                    <div class="board-section">
+                        <label>Izašlo birača:</label>
+                        <input type="number" id="izaslo-${id}" class="profi-input" placeholder="Npr. 120">
+                        
+                        <label style="margin-top:5px;">Do (vreme):</label>
+                        <input type="time" id="vreme-${id}" class="profi-input">
+                    </div>
+                    
+                    <div class="btn-row" style="margin-top: 5px;">
+                        <button class="profi-submit-btn btn-nazad" onclick="prikaziGlavniMeni('${id}')">Nazad</button>
+                        <button class="profi-submit-btn" onclick="sacuvajIzlaznost('${id}')">Potvrdi</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById(`popup-content-${id}`).innerHTML = sadrzaj;
+        };
+
+        window.sacuvajIzlaznost = function(id) {
+            let izaslo = document.getElementById(`izaslo-${id}`).value;
+            let vreme = document.getElementById(`vreme-${id}`).value;
+            
+            if(!izaslo || !vreme) return alert("Popunite oba polja (izašlo i vreme)!");
+            
+            alert(`Sačuvano!\nIzašlo: ${izaslo} birača\nDo: ${vreme} h`);
+            // Vrati se nazad u meni nakon čuvanja (ili može ostati ovde)
+            prikaziGlavniMeni(id);
+        };
+
+        // 4. TABLA ZA REZULTATE
+        window.prikaziRezultate = function(id) {
+            let sadrzaj = `
+                <div class="profi-form">
+                    <h4>Unos Rezultata</h4>
+                    
+                    <div class="board-section" style="text-align: center; color: #a0aec0; font-size: 13px; padding: 20px 10px;">
+                        Ovu tablu ćemo kasnije detaljno obraditi.
+                    </div>
+                    
+                    <button class="profi-submit-btn btn-nazad" style="width: 100%; margin-top: 5px;" onclick="prikaziGlavniMeni('${id}')">Nazad u glavni meni</button>
+                </div>
+            `;
+            document.getElementById(`popup-content-${id}`).innerHTML = sadrzaj;
+        };
+
+
+        // ADMIN KREIRANJE NOVIH MESTA
         if (isAdmin) {
             map.on('click', function(e) {
                 var lat = e.latlng.lat;
@@ -397,7 +470,6 @@
                     </div>
                 `;
 
-                // FIX: Admin prozor se isto štiti od slučajnog zatvaranja
                 L.popup({ closeOnClick: false, autoClose: false })
                     .setLatLng([lat, lng])
                     .setContent(formHtml)
