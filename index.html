@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biračka mesta - Dimitrovgrad</title>
+    <title>Dimitrovgrad - Biračka Mesta</title>
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
@@ -16,139 +16,185 @@
             padding: 0;
             height: 100%;
             width: 100%;
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
         }
 
-        /* Minimalno zaglavlje preko mape */
-        header {
-            position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(44, 62, 80, 0.9);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 1000;
-            backdrop-filter: blur(5px);
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 18px;
-            text-align: center;
-        }
-
-        /* Mapa zauzima ceo ekran */
         #map {
             width: 100%;
             height: 100vh;
+            background: #1a1a1a;
         }
 
-        /* Atraktivan GUI element (kartica) direktno na mapi */
-        .map-card-marker {
-            background: white;
-            border-radius: 8px;
+        /* Profesionalni, moderni GUI bedž direktno na mapi */
+        .profi-badge {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 12px;
             padding: 8px 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
             display: flex;
             align-items: center;
             gap: 10px;
-            border-left: 4px solid #e74c3c;
-            font-family: Arial, sans-serif;
-            white-space: nowrap;
             transform: translate(-50%, -100%);
             position: relative;
+            white-space: nowrap;
+            transition: all 0.2s ease;
         }
 
-        .map-card-marker::after {
+        .profi-badge:hover {
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+            transform: translate(-50%, -102%);
+        }
+
+        /* Donji streličasti kursor bedža */
+        .profi-badge::after {
             content: '';
             position: absolute;
-            bottom: -6px;
+            bottom: -7px;
             left: 50%;
             transform: translateX(-50%);
-            border-width: 6px 6px 0;
+            border-width: 8px 7px 0;
             border-style: solid;
-            border-color: white transparent;
+            border-color: rgba(255, 255, 255, 0.95) transparent;
             display: block;
             width: 0;
         }
 
-        .badge-number {
-            background: #e74c3c;
+        .badge-icon-box {
+            background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
-            font-weight: bold;
-            font-size: 11px;
-            padding: 3px 6px;
-            border-radius: 4px;
-        }
-
-        .badge-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .badge-title {
-            font-weight: bold;
-            font-size: 13px;
-            color: #2c3e50;
-        }
-
-        .btn-delete-badge {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-left: 5px;
-            transition: background 0.2s;
+            font-weight: 700;
+            font-size: 13px;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
         }
 
-        .btn-delete-badge:hover {
-            background: #c0392b;
-        }
-
-        /* Forma za unos pri kliku na mapu */
-        .popup-form {
+        .badge-content {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            width: 180px;
+            line-height: 1.2;
         }
 
-        .popup-form input {
-            padding: 6px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+        .badge-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #7f8c8d;
+            font-weight: 600;
         }
 
-        .popup-form button {
-            background-color: #27ae60;
+        .badge-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2c3e50;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-profi-delete {
+            background: #ff4757;
             color: white;
             border: none;
-            padding: 7px;
-            border-radius: 4px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
             cursor: pointer;
-            font-weight: bold;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 4px;
+            transition: background 0.2s, transform 0.2s;
         }
 
-        .popup-form button:hover {
-            background-color: #219653;
+        .btn-profi-delete:hover {
+            background: #ff6b81;
+            transform: scale(1.1);
+        }
+
+        /* Profi staklasti prozor za unos (popup) */
+        .leaflet-popup-content-wrapper {
+            background: rgba(20, 20, 20, 0.85) !important;
+            backdrop-filter: blur(12px);
+            color: white !important;
+            border-radius: 14px !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 5px !important;
+        }
+
+        .leaflet-popup-tip {
+            background: rgba(20, 20, 20, 0.85) !important;
+        }
+
+        .profi-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 210px;
+            padding: 8px;
+        }
+
+        .profi-form h4 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 6px;
+        }
+
+        .profi-input {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 9px 12px;
+            color: white;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .profi-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .profi-input:focus {
+            border-color: #3498db;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .profi-submit-btn {
+            background: linear-gradient(135deg, #2ed573, #26af5f);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3);
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .profi-submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        .profi-submit-btn:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
 <body>
-
-    <header>
-        <h1>Dimitrovgrad - Biračka Mesta</h1>
-    </header>
 
     <div id="map"></div>
 
@@ -173,9 +219,10 @@
         // Inicijalizacija mape centrirane na Dimitrovgrad
         var map = L.map('map', { zoomControl: false }).setView([43.0186, 22.7447], 14);
 
-        // Dodavanje dugmadi za zumiranje u ugao da ne smetaju
+        // Pozicioniranje kontrola za zumiranje diskretno u desni ugao
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
+        // Korišćenje tamne ili standardne mape po izboru (Ovde je standardna OpenStreetMap svetla podloga sa prilagođenim bedževima)
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> saradnici'
@@ -183,9 +230,8 @@
 
         var aktivniMarkeri = {};
 
-        // Praćenje baza podataka u realnom vremenu
+        // Sinhronizacija u realnom vremenu sa Firebase bazom
         onValue(mestaRef, (snapshot) => {
-            // Uklanjanje starih elemenata sa mape
             for (let id in aktivniMarkeri) {
                 map.removeLayer(aktivniMarkeri[id]);
             }
@@ -197,40 +243,41 @@
             Object.keys(data).forEach((id) => {
                 let mesto = data[id];
 
-                // Kreiranje modernog vizuelnog GUI elementa direktno na mapi
-                var customHtml = `
-                    <div class="map-card-marker">
-                        <span class="badge-number">#${mesto.broj}</span>
-                        <div class="badge-info">
-                            <span class="badge-title">${mesto.naziv}</span>
+                // Konstruisanje profesionalnog HTML bedža
+                var badgeHtml = `
+                    <div class="profi-badge">
+                        <div class="badge-icon-box">#${mesto.broj}</div>
+                        <div class="badge-content">
+                            <span class="badge-label">Biračko mesto</span>
+                            <span class="badge-title" title="${mesto.naziv}">${mesto.naziv}</span>
                         </div>
-                        <button class="btn-delete-badge" onclick="obrisiMesto('${id}', event)" title="Obriši">×</button>
+                        <button class="btn-profi-delete" onclick="obrisiMesto('${id}', event)" title="Ukloni mesto">✕</button>
                     </div>
                 `;
 
-                var customIcon = L.divIcon({
-                    className: 'custom-div-icon',
-                    html: customHtml,
-                    iconSize: [0, 0], // Pozicionira se preko CSS transform-a
+                var profiIcon = L.divIcon({
+                    className: 'custom-profi-icon',
+                    html: badgeHtml,
+                    iconSize: [0, 0],
                     iconAnchor: [0, 0]
                 });
 
-                var marker = L.marker([mesto.lat, mesto.lng], { icon: customIcon }).addTo(map);
+                var marker = L.marker([mesto.lat, mesto.lng], { icon: profiIcon }).addTo(map);
                 aktivniMarkeri[id] = marker;
             });
         });
 
-        // Klik na mapu otvara formu za dodavanje novog mesta
+        // Klik na bilo koji deo mape otvara profi formu za unos
         map.on('click', function(e) {
             var lat = e.latlng.lat;
             var lng = e.latlng.lng;
 
             var formHtml = `
-                <div class="popup-form">
-                    <strong>Novo biračko mesto</strong>
-                    <input type="text" id="input-broj" placeholder="Broj (npr. 12)">
-                    <input type="text" id="input-naziv" placeholder="Naziv (Dom kulture)">
-                    <button id="save-btn">Sačuvaj na mapu</button>
+                <div class="profi-form">
+                    <h4>Novo Biračko Mesto</h4>
+                    <input type="text" id="input-broj" class="profi-input" placeholder="Broj (npr. 05)">
+                    <input type="text" id="input-naziv" class="profi-input" placeholder="Naziv (npr. Osnovna škola)">
+                    <button id="save-btn" class="profi-submit-btn">Sačuvaj na mapu</button>
                 </div>
             `;
 
@@ -243,11 +290,11 @@
                 var saveBtn = document.getElementById('save-btn');
                 if (saveBtn) {
                     saveBtn.onclick = function() {
-                        var broj = document.getElementById('input-broj').value;
-                        var naziv = document.getElementById('input-naziv').value;
+                        var broj = document.getElementById('input-broj').value.trim();
+                        var naziv = document.getElementById('input-naziv').value.trim();
 
                         if (!broj || !naziv) {
-                            alert("Molimo unesite i broj i naziv biračkog mesta!");
+                            alert("Molimo popunite oba polja (broj i naziv)!");
                             return;
                         }
 
@@ -260,14 +307,14 @@
                         }).then(() => {
                             map.closePopup();
                         }).catch((error) => {
-                            alert("Greška pri čuvanju: " + error.message);
+                            alert("Greška pri upisu u bazu: " + error.message);
                         });
                     };
                 }
             }, 100);
         });
 
-        // Funkcija za brisanje direktno sa markera na mapi
+        // Funkcija za brisanje sačuvane lokacije
         window.obrisiMesto = function(id, event) {
             event.stopPropagation();
             if (confirm("Da li ste sigurni da želite da obrišete ovo biračko mesto?")) {
