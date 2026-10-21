@@ -35,14 +35,12 @@
             font-size: 20px;
         }
 
-        /* Glavni kontejner deli ekran na meni levo i mapu desno */
         .main-container {
             display: flex;
             flex: 1;
             height: calc(100vh - 55px);
         }
 
-        /* Stil za bočni GUI panel */
         #sidebar {
             width: 320px;
             background-color: #f8f9fa;
@@ -80,13 +78,11 @@
             color: #2c3e50;
         }
 
-        /* Stil za mapu */
         #map {
             flex: 1;
             height: 100%;
         }
 
-        /* Forma unutar popupa na mapi */
         .popup-form {
             display: flex;
             flex-direction: column;
@@ -121,6 +117,17 @@
         .btn-obrisi:hover {
             background-color: #c0392b !important;
         }
+
+        /* Stil za trajni naziv (tooltip) na mapi da uvek stoji vidljiv */
+        .trajni-naziv {
+            font-weight: bold;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #2c3e50;
+            padding: 2px 6px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
@@ -130,7 +137,7 @@
     </header>
 
     <div class="main-container">
-        <!-- Leva strana: GUI lista unetih mesta -->
+        <!-- Leva strana: Lista unetih mesta -->
         <div id="sidebar">
             <h3>Lista biračkih mesta</h3>
             <div id="lista-mesta">Učitavanje...</div>
@@ -170,7 +177,7 @@
 
         // Slušanje promena u bazi u realnom vremenu
         onValue(mestaRef, (snapshot) => {
-            // Uklanjanje starih markera
+            // Uklanjanje starijih markera sa mape pre ponovnog iscrtavanja
             for (let id in aktivniMarkeri) {
                 map.removeLayer(aktivniMarkeri[id]);
             }
@@ -188,9 +195,16 @@
             Object.keys(data).forEach((id) => {
                 let mesto = data[id];
 
-                // 1. Dodavanje markera na mapu
+                // 1. Dodavanje markera sa TRAJNIM nazivom (tooltip) iznad njega
                 var marker = L.marker([mesto.lat, mesto.lng]).addTo(map);
-                marker.bindPopup(`<b>Broj:</b> ${mesto.broj}<br><b>Naziv:</b> ${mesto.naziv}`);
+                
+                // Prikazuje naziv i broj direktno na mapi sve vreme
+                marker.bindTooltip(`Br. ${mesto.broj}: ${mesto.naziv}`, {
+                    permanent: true,
+                    direction: 'top',
+                    className: 'trajni-naziv'
+                });
+
                 aktivniMarkeri[id] = marker;
 
                 // 2. Dodavanje kartice u levi GUI meni
@@ -201,19 +215,17 @@
                     <button class="popup-form button btn-obrisi" style="width:100%; padding:3px; font-size:12px; margin-top:5px;" onclick="obrisiMesto('${id}', event)">Obriši</button>
                 `;
                 
-                // Kada se klikne na karticu u meniju, mapa centrira pogled na to mesto
+                // Klik na karticu u meniju zumira mapu na to mesto
                 kartica.onclick = function(e) {
-                    // Sprečavamo da se klik na obriši aktivira i centriranje
                     if(e.target.tagName === 'BUTTON') return;
                     map.setView([mesto.lat, mesto.lng], 16);
-                    marker.openPopup();
                 };
 
                 listaDiv.appendChild(kartica);
             });
         });
 
-        // Klik na mapu otvara formu za unos
+        // Klik na mapu otvara formu za unos novog biračkog mesta
         map.on('click', function(e) {
             var lat = e.latlng.lat;
             var lng = e.latlng.lng;
@@ -260,7 +272,7 @@
             }, 100);
         });
 
-        // Globalna funkcija za brisanje pojedinačnog mesta
+        // Funkcija za brisanje pojedinačnog mesta
         window.obrisiMesto = function(id, event) {
             event.stopPropagation();
             if (confirm("Da li ste sigurni da želite da obrišete ovo biračko mesto?")) {
