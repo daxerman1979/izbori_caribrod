@@ -20,311 +20,153 @@
             overflow: hidden;
         }
 
-        #map {
-            width: 100%;
-            height: 100vh;
-            background: #e5e5e5;
-        }
+        #map { width: 100%; height: 100vh; background: #e5e5e5; }
 
-        .custom-transparent-icon {
-            background: transparent !important;
-            border: none !important;
-        }
+        .custom-transparent-icon { background: transparent !important; border: none !important; }
 
         .map-pin-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
+            position: absolute; bottom: 0; left: 0;
             transform: translate(-50%, -100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: flex; flex-direction: column; align-items: center;
             filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.25));
-            z-index: 1000;
-            cursor: pointer;
+            z-index: 1000; cursor: pointer;
         }
 
-        .map-pin-container:hover .map-board {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-        }
+        .map-pin-container:hover .map-board { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
 
         .map-board {
-            background: #ffffff;
-            border-radius: 6px;
-            padding: 8px 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            min-width: 80px;
-            max-width: 220px;
-            transition: all 0.2s ease;
+            background: #ffffff; border-radius: 6px; padding: 8px 16px;
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            min-width: 80px; max-width: 220px; transition: all 0.2s ease;
         }
 
-        .board-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #1e293b;
-            text-align: center;
-            white-space: normal;
-            word-wrap: break-word;
-            line-height: 1.2;
-        }
+        .board-title { font-size: 14px; font-weight: 700; color: #1e293b; text-align: center; line-height: 1.2; }
+        .board-number { font-size: 11px; color: #ef4444; font-weight: 700; background: #fee2e2; padding: 2px 10px; border-radius: 12px; }
+        .map-triangle { width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #ffffff; margin-top: -1px; }
 
-        .board-number {
-            font-size: 11px;
-            color: #ef4444;
-            font-weight: 700;
-            background: #fee2e2;
-            padding: 2px 10px;
-            border-radius: 12px;
-            white-space: nowrap;
-            letter-spacing: 0.5px;
-        }
-
-        .map-triangle {
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 8px solid #ffffff;
-            margin-top: -1px;
-        }
-
-        .leaflet-popup-tip-container {
-            display: none !important;
-        }
-        
-        .leaflet-popup {
-            margin-bottom: 25px !important;
-        }
-
+        .leaflet-popup-tip-container { display: none !important; }
+        .leaflet-popup { margin-bottom: 25px !important; }
         .leaflet-popup-content-wrapper {
-            background: rgba(20, 20, 20, 0.85) !important;
-            backdrop-filter: blur(12px);
-            color: white !important;
-            border-radius: 14px !important;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 5px !important;
+            background: rgba(20, 20, 20, 0.85) !important; backdrop-filter: blur(12px); color: white !important;
+            border-radius: 14px !important; box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1); padding: 5px !important;
         }
+        .leaflet-popup-close-button { color: #ffffff !important; font-size: 18px !important; top: 6px !important; right: 10px !important; font-weight: bold !important; transition: color 0.2s; }
+        .leaflet-popup-close-button:hover { color: #ff4757 !important; }
 
-        .leaflet-popup-close-button {
-            color: #ffffff !important;
-            font-size: 18px !important;
-            top: 6px !important;
-            right: 10px !important;
-            font-weight: bold !important;
-            transition: color 0.2s;
-        }
-        .leaflet-popup-close-button:hover {
-            color: #ff4757 !important;
-            background: transparent !important;
-        }
+        .profi-form { display: flex; flex-direction: column; gap: 12px; width: 230px; padding: 8px; }
+        .profi-form h4 { margin: 0 0 5px 0; font-size: 14px; font-weight: 600; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; text-align: center; }
 
-        .profi-form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 230px;
-            padding: 8px;
-        }
+        .board-section { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .board-section-title { font-size: 11px; text-transform: uppercase; color: #3498db; font-weight: 700; letter-spacing: 0.5px; margin: 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
 
-        .profi-form h4 {
-            margin: 0 0 5px 0;
-            font-size: 14px;
-            font-weight: 600;
-            color: #ffffff;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 6px;
-            text-align: center;
-        }
+        .profi-input { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 10px; color: white; font-size: 13px; outline: none; width: 100%; box-sizing: border-box; }
+        .profi-input:focus { border-color: #3498db; background: rgba(255, 255, 255, 0.12); }
+        .profi-form label { font-size: 11px; color: #a0aec0; margin-bottom: -6px; font-weight: 600; }
 
-        .board-section {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .profi-submit-btn { background: linear-gradient(135deg, #2ed573, #26af5f); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+        .profi-submit-btn:hover { opacity: 0.9; }
 
-        .board-section-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #3498db;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            margin: 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 4px;
-        }
+        .btn-nazad { background: #7f8c8d; }
+        .btn-izlaznost { background: linear-gradient(135deg, #f39c12, #d35400); }
+        .btn-rezultati { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .btn-row { display: flex; gap: 8px; }
+        .btn-row > button { flex: 1; }
 
-        .profi-input {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            padding: 8px 10px;
-            color: white;
-            font-size: 13px;
-            outline: none;
-            transition: border-color 0.2s;
-            width: 100%;
-            box-sizing: border-box;
-        }
+        #admin-badge { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: white; padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 1000; display: none; }
 
-        .profi-input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
+        /* Donji panel za Statistiku */
+        #stat-panel {
+            position: fixed; bottom: -60vh; left: 0; width: 100%; height: 50vh;
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px);
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5); z-index: 2000;
+            transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column; color: white;
         }
+        #stat-panel.otvoren { bottom: 0; }
+        .stat-header { display: flex; padding: 15px 20px; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); border-top-left-radius: 20px; border-top-right-radius: 20px; align-items: center; justify-content: space-between; }
+        .stat-tabs { display: flex; gap: 10px; }
+        .stat-tab { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        .stat-tab.active-tab { background: #3498db; }
+        .close-stat { background: transparent; border: none; color: white; font-size: 24px; cursor: pointer; line-height: 1; }
+        .stat-content { padding: 20px; overflow-y: auto; flex: 1; }
 
-        .profi-input:focus {
-            border-color: #3498db;
-            background: rgba(255, 255, 255, 0.12);
-        }
+        /* Stilovi za progres bar izlaznosti */
+        .stat-row { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 15px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        .stat-row-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; font-size: 14px;}
+        .progress-bg { width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #e67e22); width: 0%; transition: width 1s ease-in-out; }
+        .stat-time { font-size: 11px; color: #a0aec0; margin-top: 5px; }
 
-        .profi-form label {
-            font-size: 11px;
-            color: #a0aec0;
-            margin-bottom: -6px;
-            font-weight: 600;
-        }
-
-        .profi-submit-btn {
-            background: linear-gradient(135deg, #2ed573, #26af5f);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: opacity 0.2s, transform 0.1s;
-        }
-
-        .profi-submit-btn:hover {
-            opacity: 0.9;
-        }
-
-        .profi-submit-btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-nazad {
-            background: #7f8c8d;
-        }
-        .btn-izlaznost {
-            background: linear-gradient(135deg, #f39c12, #d35400);
-        }
-        .btn-rezultati {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 8px;
-        }
-        .btn-row > button {
-            flex: 1;
-        }
-
-        #admin-badge {
-            position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #e74c3c;
-            color: white;
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            z-index: 1000;
-            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
-            display: none;
-        }
+        /* Plutajuće dugme za otvaranje panela */
+        #btn-otvori-stat { position: absolute; bottom: 20px; right: 20px; background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 30px; font-weight: bold; z-index: 1000; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
 
     <div id="admin-badge">ADMIN REŽIM AKTIVAN</div>
     <div id="map"></div>
+    <button id="btn-otvori-stat" onclick="toggleStatPanel(true)">📊 Statistika</button>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
-            crossorigin=""></script>
+    <!-- Donji Panel za statistiku -->
+    <div id="stat-panel">
+        <div class="stat-header">
+            <div class="stat-tabs">
+                <button class="stat-tab active-tab" onclick="prikaziStatTab('izlaznost')" id="tab-izlaznost">Izlaznost</button>
+                <button class="stat-tab" onclick="prikaziStatTab('rezultati')" id="tab-rezultati">Rezultati</button>
+            </div>
+            <button class="close-stat" onclick="toggleStatPanel(false)">&times;</button>
+        </div>
+        <div class="stat-content" id="stat-content-area">
+            <!-- Podaci se pune iz JavaScripta -->
+        </div>
+    </div>
 
-    <!-- Firebase SDK -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        const firebaseConfig = {
-            databaseURL: "https://daxgame-ad90a-default-rtdb.europe-west1.firebasedatabase.app/"
-        };
-
+        const firebaseConfig = { databaseURL: "https://daxgame-ad90a-default-rtdb.europe-west1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const mestaRef = ref(db, 'biracka_mesta');
 
         const urlParams = new URLSearchParams(window.location.search);
         const isAdmin = urlParams.get('admin') === 'da';
-
-        if (isAdmin) {
-            document.getElementById('admin-badge').style.display = 'block';
-        }
+        if (isAdmin) document.getElementById('admin-badge').style.display = 'block';
 
         var map = L.map('map', { zoomControl: false }).setView([43.0186, 22.7447], 14);
-        L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> saradnici'
-        }).addTo(map);
+        L.control.zoom({ position: 'topleft' }).addTo(map);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
         var aktivniMarkeri = {};
-        let tajmerNeaktivnosti;
+        var globalnaMestaData = {}; // Čuvamo podatke za panel
 
-        function resetujTajmer() {
-            if (isAdmin) return; 
-            clearTimeout(tajmerNeaktivnosti);
-            tajmerNeaktivnosti = setTimeout(() => {
-                map.closePopup(); 
-            }, 60000);
+        // Generatori za padajuće liste vremena
+        window.getSatiOptions = function() {
+            let opts = '';
+            for(let i=0; i<24; i++) { let v = i.toString().padStart(2,'0'); opts += `<option value="${v}">${v}</option>`; }
+            return opts;
+        }
+        window.getMinutiOptions = function() {
+            let opts = '';
+            for(let i=0; i<60; i+=5) { let v = i.toString().padStart(2,'0'); opts += `<option value="${v}">${v}</option>`; }
+            return opts;
         }
 
-        map.on('popupopen', function(e) {
-            if (!isAdmin) {
-                let popupEl = e.popup.getElement();
-                if (popupEl) {
-                    popupEl.addEventListener('mousemove', resetujTajmer);
-                    popupEl.addEventListener('keypress', resetujTajmer);
-                    popupEl.addEventListener('click', resetujTajmer);
-                    popupEl.addEventListener('input', resetujTajmer);
-                }
-                resetujTajmer(); 
-            }
-        });
-
-        map.on('popupclose', function() {
-            clearTimeout(tajmerNeaktivnosti);
-        });
-
         onValue(mestaRef, (snapshot) => {
-            for (let id in aktivniMarkeri) {
-                map.removeLayer(aktivniMarkeri[id]);
-            }
+            for (let id in aktivniMarkeri) map.removeLayer(aktivniMarkeri[id]);
             aktivniMarkeri = {};
-
             const data = snapshot.val();
             if (!data) return;
 
+            globalnaMestaData = data; // Ažuriramo lokalnu kopiju podataka
+            azurirajStatistiku(); // Osveži donji panel
+
             Object.keys(data).forEach((id) => {
                 let mesto = data[id];
-
                 var pinHtml = `
                     <div class="map-pin-container">
                         <div class="map-board">
@@ -332,178 +174,200 @@
                             <span class="board-number">Broj: ${mesto.broj}</span>
                         </div>
                         <div class="map-triangle"></div>
-                    </div>
-                `;
+                    </div>`;
 
-                var pinIcon = L.divIcon({
-                    className: 'custom-transparent-icon',
-                    html: pinHtml,
-                    iconSize: [0, 0],
-                    iconAnchor: [0, 0]
-                });
-
+                var pinIcon = L.divIcon({ className: 'custom-transparent-icon', html: pinHtml, iconSize: [0, 0], iconAnchor: [0, 0] });
                 var marker = L.marker([mesto.lat, mesto.lng], { icon: pinIcon }).addTo(map);
                 
                 marker.on('click', function(e) {
                     L.DomEvent.stopPropagation(e); 
-
                     let popupContent = `
                         <div class="profi-form" id="popup-content-${id}">
                             <h4>Zaštićen pristup</h4>
                             <input type="password" id="pin-input-${id}" class="profi-input" placeholder="Unesite 6-cifreni kod..." maxlength="6">
                             <button class="profi-submit-btn" onclick="proveriPin('${id}')">Otključaj Tablu</button>
-                        </div>
-                    `;
-
-                    L.popup({ closeOnClick: false, autoClose: false })
-                        .setLatLng(marker.getLatLng())
-                        .setContent(popupContent)
-                        .openOn(map);
+                        </div>`;
+                    L.popup({ closeOnClick: false, autoClose: false }).setLatLng(marker.getLatLng()).setContent(popupContent).openOn(map);
                 });
-
                 aktivniMarkeri[id] = marker;
             });
         });
 
-        // 1. Provera koda
         window.proveriPin = function(id) {
             let uneseniPin = document.getElementById(`pin-input-${id}`).value;
-            if (uneseniPin === '123456') {
-                prikaziGlavniMeni(id);
-                resetujTajmer(); 
-            } else {
-                alert("Netačan kod! Pokušajte ponovo.");
-            }
+            if (uneseniPin === '123456') { prikaziGlavniMeni(id); } else { alert("Netačan kod!"); }
         };
 
-        // 2. GLAVNA TABLA (Meni za navigaciju i ukupan broj birača)
         window.prikaziGlavniMeni = function(id) {
+            let mesto = globalnaMestaData[id];
+            let ukBrojStr = mesto.ukupan_broj ? mesto.ukupan_broj : '';
             let sadrzaj = `
                 <div class="profi-form">
                     <h4>Kontrolna Tabla</h4>
-                    
                     <div class="board-section">
                         <label>Broj glasača po biračkom spisku</label>
-                        <input type="number" id="ukupan-broj-${id}" class="profi-input" placeholder="Unesite ukupan broj...">
-                        <button class="profi-submit-btn" style="padding: 6px; margin-top: 2px;" onclick="sacuvajUkupanBroj('${id}')">Sačuvaj</button>
+                        <input type="number" id="ukupan-broj-${id}" class="profi-input" placeholder="Unesite ukupan broj..." value="${ukBrojStr}">
+                        <button class="profi-submit-btn" style="padding: 6px; margin-top: 2px;" onclick="sacuvajUkupanBroj('${id}')">Sačuvaj broj</button>
                     </div>
-                    
                     <div class="btn-row" style="margin-top: 5px;">
                         <button class="profi-submit-btn btn-izlaznost" onclick="prikaziIzlaznost('${id}')">Izlaznost</button>
                         <button class="profi-submit-btn btn-rezultati" onclick="prikaziRezultate('${id}')">Rezultati</button>
                     </div>
-                </div>
-            `;
+                </div>`;
             document.getElementById(`popup-content-${id}`).innerHTML = sadrzaj;
         };
 
         window.sacuvajUkupanBroj = function(id) {
             let broj = document.getElementById(`ukupan-broj-${id}`).value;
             if(!broj) return alert("Unesite broj glasača!");
-            alert("Sačuvan ukupan broj: " + broj);
-            // Kasnije ovde ide slanje u Firebase
+            update(ref(db, 'biracka_mesta/' + id), { ukupan_broj: parseInt(broj) })
+                .then(() => alert("Broj uspešno sačuvan!"))
+                .catch(err => alert("Greška: " + err));
         };
 
-        // 3. TABLA ZA IZLAZNOST
         window.prikaziIzlaznost = function(id) {
+            let mesto = globalnaMestaData[id];
+            let izStr = mesto.izaslo ? mesto.izaslo : '';
             let sadrzaj = `
                 <div class="profi-form">
                     <h4>Unos Izlaznosti</h4>
-                    
                     <div class="board-section">
                         <label>Izašlo birača:</label>
-                        <input type="number" id="izaslo-${id}" class="profi-input" placeholder="Npr. 120">
+                        <input type="number" id="izaslo-${id}" class="profi-input" placeholder="Npr. 120" value="${izStr}">
                         
                         <label style="margin-top:5px;">Do (vreme):</label>
-                        <input type="time" id="vreme-${id}" class="profi-input">
+                        <div class="btn-row">
+                            <select id="vreme-sat-${id}" class="profi-input">${getSatiOptions()}</select>
+                            <span style="color:white; align-self:center;">:</span>
+                            <select id="vreme-minut-${id}" class="profi-input">${getMinutiOptions()}</select>
+                        </div>
                     </div>
-                    
                     <div class="btn-row" style="margin-top: 5px;">
                         <button class="profi-submit-btn btn-nazad" onclick="prikaziGlavniMeni('${id}')">Nazad</button>
                         <button class="profi-submit-btn" onclick="sacuvajIzlaznost('${id}')">Potvrdi</button>
                     </div>
-                </div>
-            `;
+                </div>`;
             document.getElementById(`popup-content-${id}`).innerHTML = sadrzaj;
         };
 
         window.sacuvajIzlaznost = function(id) {
             let izaslo = document.getElementById(`izaslo-${id}`).value;
-            let vreme = document.getElementById(`vreme-${id}`).value;
-            
-            if(!izaslo || !vreme) return alert("Popunite oba polja (izašlo i vreme)!");
-            
-            alert(`Sačuvano!\nIzašlo: ${izaslo} birača\nDo: ${vreme} h`);
-            // Vrati se nazad u meni nakon čuvanja (ili može ostati ovde)
-            prikaziGlavniMeni(id);
+            let sat = document.getElementById(`vreme-sat-${id}`).value;
+            let minut = document.getElementById(`vreme-minut-${id}`).value;
+            if(!izaslo) return alert("Unesite broj izašlih birača!");
+
+            let vremeSastavljeno = `${sat}:${minut}`;
+            update(ref(db, 'biracka_mesta/' + id), { izaslo: parseInt(izaslo), vreme_update: vremeSastavljeno })
+                .then(() => {
+                    alert("Izlaznost uspešno sačuvana!");
+                    prikaziGlavniMeni(id);
+                    toggleStatPanel(true); // Automatski otvara panel za statistiku odozdo!
+                })
+                .catch(err => alert("Greška: " + err));
         };
 
-        // 4. TABLA ZA REZULTATE
         window.prikaziRezultate = function(id) {
             let sadrzaj = `
                 <div class="profi-form">
                     <h4>Unos Rezultata</h4>
-                    
                     <div class="board-section" style="text-align: center; color: #a0aec0; font-size: 13px; padding: 20px 10px;">
                         Ovu tablu ćemo kasnije detaljno obraditi.
                     </div>
-                    
-                    <button class="profi-submit-btn btn-nazad" style="width: 100%; margin-top: 5px;" onclick="prikaziGlavniMeni('${id}')">Nazad u glavni meni</button>
-                </div>
-            `;
+                    <button class="profi-submit-btn btn-nazad" style="width: 100%; margin-top: 5px;" onclick="prikaziGlavniMeni('${id}')">Nazad u glavni</button>
+                </div>`;
             document.getElementById(`popup-content-${id}`).innerHTML = sadrzaj;
         };
 
-
-        // ADMIN KREIRANJE NOVIH MESTA
+        // ADMIN DEO
         if (isAdmin) {
             map.on('click', function(e) {
-                var lat = e.latlng.lat;
-                var lng = e.latlng.lng;
-
+                var lat = e.latlng.lat; var lng = e.latlng.lng;
                 var formHtml = `
                     <div class="profi-form">
                         <h4>Novo Biračko Mesto</h4>
                         <input type="text" id="input-naziv" class="profi-input" placeholder="Naziv (npr. Dom kulture)">
                         <input type="text" id="input-broj" class="profi-input" placeholder="Broj (npr. 05)">
                         <button id="save-btn" class="profi-submit-btn">Postavi tablu na mapu</button>
-                    </div>
-                `;
-
-                L.popup({ closeOnClick: false, autoClose: false })
-                    .setLatLng([lat, lng])
-                    .setContent(formHtml)
-                    .openOn(map);
-
+                    </div>`;
+                L.popup({ closeOnClick: false, autoClose: false }).setLatLng([lat, lng]).setContent(formHtml).openOn(map);
                 setTimeout(() => {
-                    var saveBtn = document.getElementById('save-btn');
-                    if (saveBtn) {
-                        saveBtn.onclick = function() {
-                            var naziv = document.getElementById('input-naziv').value.trim();
-                            var broj = document.getElementById('input-broj').value.trim();
-
-                            if (!naziv || !broj) {
-                                alert("Molimo popunite oba polja (naziv i broj)!");
-                                return;
-                            }
-
-                            const novoMestoRef = push(mestaRef);
-                            set(novoMestoRef, {
-                                lat: lat,
-                                lng: lng,
-                                naziv: naziv,
-                                broj: broj
-                            }).then(() => {
-                                map.closePopup();
-                            }).catch((error) => {
-                                alert("Greška pri upisu u bazu: " + error.message);
-                            });
-                        };
-                    }
+                    var btn = document.getElementById('save-btn');
+                    if (btn) btn.onclick = function() {
+                        var n = document.getElementById('input-naziv').value.trim();
+                        var b = document.getElementById('input-broj').value.trim();
+                        if (!n || !b) return alert("Popunite oba polja!");
+                        push(mestaRef, { lat: lat, lng: lng, naziv: n, broj: b }).then(() => map.closePopup());
+                    };
                 }, 100);
             });
         }
-    </script>
 
+        // LOGIKA ZA DONJI PANEL (STATISTIKA)
+        window.toggleStatPanel = function(otvori) {
+            let p = document.getElementById('stat-panel');
+            if(otvori) p.classList.add('otvoren');
+            else p.classList.remove('otvoren');
+            if(otvori) azurirajStatistiku();
+        }
+
+        let trenutniTab = 'izlaznost';
+        window.prikaziStatTab = function(tab) {
+            trenutniTab = tab;
+            document.getElementById('tab-izlaznost').classList.remove('active-tab');
+            document.getElementById('tab-rezultati').classList.remove('active-tab');
+            document.getElementById(`tab-${tab}`).classList.add('active-tab');
+            azurirajStatistiku();
+        }
+
+        window.azurirajStatistiku = function() {
+            let container = document.getElementById('stat-content-area');
+            if(!globalnaMestaData) { container.innerHTML = "<p>Nema podataka</p>"; return; }
+
+            if(trenutniTab === 'izlaznost') {
+                let html = '';
+                let ukupnoGlasacaSvi = 0;
+                let ukupnoIzasloSvi = 0;
+
+                Object.keys(globalnaMestaData).forEach(id => {
+                    let m = globalnaMestaData[id];
+                    let upisano = m.ukupan_broj || 0;
+                    let izaslo = m.izaslo || 0;
+                    let procenat = 0;
+                    
+                    if(upisano > 0) {
+                        procenat = ((izaslo / upisano) * 100).toFixed(1);
+                        ukupnoGlasacaSvi += upisano;
+                        ukupnoIzasloSvi += izaslo;
+                    }
+
+                    html += `
+                        <div class="stat-row">
+                            <div class="stat-row-header">
+                                <span>Br. ${m.broj} - ${m.naziv}</span>
+                                <span style="color:#f39c12;">${procenat}%</span>
+                            </div>
+                            <div class="progress-bg">
+                                <div class="progress-fill" style="width: ${procenat}%"></div>
+                            </div>
+                            <div class="stat-time">Poslednji update: ${m.vreme_update ? m.vreme_update + 'h' : 'Nema unosa'} | Izašlo: ${izaslo} / ${upisano}</div>
+                        </div>
+                    `;
+                });
+
+                // Dodavanje zbirne statistike na vrh
+                let totalProcenat = ukupnoGlasacaSvi > 0 ? ((ukupnoIzasloSvi / ukupnoGlasacaSvi) * 100).toFixed(1) : 0;
+                let topHtml = `
+                    <div style="text-align:center; margin-bottom: 20px;">
+                        <h2 style="margin:0; font-size:32px; color:#f39c12;">${totalProcenat}%</h2>
+                        <p style="margin:0; color:#a0aec0; font-size:12px; text-transform:uppercase;">Ukupna prosečna izlaznost (${ukupnoIzasloSvi}/${ukupnoGlasacaSvi})</p>
+                    </div>
+                `;
+
+                container.innerHTML = topHtml + html;
+            } else {
+                container.innerHTML = `<div style="text-align:center; padding: 40px; color: #a0aec0;">Ovde će biti prikazani rezultati po strankama u narednoj fazi.</div>`;
+            }
+        }
+    </script>
 </body>
 </html>
