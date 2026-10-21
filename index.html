@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa - Dimitrovgrad, Srbija</title>
+    <title>Biračka mesta - Dimitrovgrad (Firebase)</title>
     
-    <!-- Učitavanje Leaflet CSS-a (besplatna biblioteka za mape) -->
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
           crossorigin=""/>
 
     <style>
-        /* Osnovni stilovi za stranicu da zauzme ceo ekran */
         html, body {
             margin: 0;
             padding: 0;
@@ -20,54 +19,186 @@
             font-family: Arial, sans-serif;
         }
 
-        /* Stil za zaglavlje */
         header {
             background-color: #2c3e50;
             color: white;
             padding: 15px 20px;
             text-align: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         header h1 {
             margin: 0;
-            font-size: 24px;
+            font-size: 20px;
         }
 
-        /* Kontejner u kojem će se prikazivati mapa (mora imati definisanu visinu) */
+        #clear-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #clear-btn:hover {
+            background-color: #c0392b;
+        }
+
         #map {
             width: 100%;
-            height: calc(100vh - 60px); /* Visina celog ekrana minus visina zaglavlja */
+            height: calc(100vh - 60px);
+        }
+
+        .popup-form {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 180px;
+        }
+
+        .popup-form input {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .popup-form button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 6px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .popup-form button:hover {
+            background-color: #219653;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Dimitrovgrad, Srbija</h1>
+        <h1>Dimitrovgrad - Biračka Mesta (Centralna baza)</h1>
+        <button id="clear-btn" onclick="obrisiSve()">Obriši sva mesta</button>
     </header>
 
-    <!-- Element gde će Leaflet učitati mapu -->
     <div id="map"></div>
 
-    <!-- Učitavanje Leaflet JavaScript biblioteke -->
+    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
             crossorigin=""></script>
 
-    <script>
-        // Inicijalizacija mape: koordinate za Dimitrovgrad (Širina: 43.0186, Dužina: 22.7447), zum je podešen na 14
+    <!-- Firebase SDK (Modularna verzija preko CDN-a) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Konfiguracija vaše Firebase baze
+        const firebaseConfig = {
+            databaseURL: "https://daxgame-ad90a-default-rtdb.europe-west1.firebasedatabase.app/"
+        };
+
+        // Inicijalizacija Firebase-a
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const mestaRef = ref(db, 'biracka_mesta');
+
+        // 1. Inicijalizacija mape
         var map = L.map('map').setView([43.0186, 22.7447], 14);
 
-        // Dodavanje besplatnih OpenStreetMap slojeva (pločica) sa mapom
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> saradnici'
         }).addTo(map);
 
-        // Dodavanje markera (crvene igle) na centar Dimitrovgrada sa propratnim tekstom
-        var marker = L.marker([43.0186, 22.7447]).addTo(map);
-        marker.bindPopup("<b>Dimitrovgrad</b><br>Dobrodošli!").openPopup();
+        // Čuvanje reference na sve aktivne markere na mapi da možemo da ih osvežavamo
+        var aktivniMarkeri = {};
+
+        // 2. Automatsko slušanje promena u bazi u realnom vremenu
+        onValue(mestaRef, (snapshot) => {
+            // Uklanjanje starih markera sa mape pre ponovnog iscrtavanja
+            for (let id in aktivniMarkeri) {
+                map.removeLayer(aktivniMarkeri[id]);
+            }
+            aktivniMarkeri = {};
+
+            const data = snapshot.val();
+            if (data) {
+                Object.keys(data).forEach((id) => {
+                    let mesto = data[id];
+                    var marker = L.marker([mesto.lat, mesto.lng]).addTo(map);
+                    marker.bindPopup(`<b>Broj:</b> ${mesto.broj}<br><b>Naziv:</b> ${mesto.naziv}`);
+                    aktivniMarkeri[id] = marker;
+                });
+            }
+        });
+
+        // 3. Reagovanje na klik na mapu za dodavanje novog mesta
+        map.on('click', function(e) {
+            var lat = e.latlng.lat;
+            var lng = e.latlng.lng;
+
+            var formHtml = `
+                <div class="popup-form">
+                    <strong>Novo biračko mesto</strong>
+                    <input type="text" id="input-broj" placeholder="Broj mesta (npr. 12)">
+                    <input type="text" id="input-naziv" placeholder="Naziv (npr. Dom kulture)">
+                    <button id="save-btn">Sačuvaj</button>
+                </div>
+            `;
+
+            var popup = L.popup()
+                .setLatLng([lat, lng])
+                .setContent(formHtml)
+                .openOn(map);
+
+            // Čekamo da se popup pojavi u DOM-u pa kačimo event listener na dugme
+            setTimeout(() => {
+                var saveBtn = document.getElementById('save-btn');
+                if (saveBtn) {
+                    saveBtn.onclick = function() {
+                        var broj = document.getElementById('input-broj').value;
+                        var naziv = document.getElementById('input-naziv').value;
+
+                        if (!broj || !naziv) {
+                            alert("Molimo unesite i broj i naziv biračkog mesta!");
+                            return;
+                        }
+
+                        // Slanje novog podatka u Firebase bazu
+                        const novoMestoRef = push(mestaRef);
+                        set(novoMestoRef, {
+                            lat: lat,
+                            lng: lng,
+                            broj: broj,
+                            naziv: naziv
+                        }).then(() => {
+                            map.closePopup();
+                        }).catch((error) => {
+                            alert("Greška pri čuvanju: " + error.message);
+                        });
+                    };
+                }
+            }, 100);
+        });
+
+        // 4. Globalna funkcija za brisanje svih mesta iz baze
+        window.obrisiSve = function() {
+            if (confirm("Da li ste sigurni da želite da obrišete sva biračka mesta iz baze?")) {
+                remove(mestaRef).then(() => {
+                    alert("Sva mesta su obrisana.");
+                }).catch((error) => {
+                    alert("Greška pri brisanju: " + error.message);
+                });
+            }
+        };
     </script>
 
 </body>
