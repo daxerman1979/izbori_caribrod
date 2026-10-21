@@ -55,7 +55,6 @@
 
         #admin-badge { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: white; padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 1000; display: none; box-shadow: 0 4px 10px rgba(231,76,60,0.4); }
 
-        /* --- STATISTIKA PANEL --- */
         #stat-panel { position: fixed; bottom: -85vh; left: 0; width: 100%; height: 80vh; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.6); z-index: 2000; transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; color: white; }
         #stat-panel.otvoren { bottom: 0; }
         
@@ -67,12 +66,10 @@
         .close-stat { background: transparent; border: none; color: white; font-size: 28px; cursor: pointer; line-height: 1; transition: transform 0.2s; }
         .close-stat:hover { transform: scale(1.2); color: #ff4757; }
         
-        /* Oznaka za Opštinu (UKUPNO) u samom panelu */
         .opstina-naslov { display: flex; align-items: center; gap: 8px; justify-content: center; font-size: 12px; font-weight: 800; color: #ecf0f1; letter-spacing: 1.5px; margin: 15px 0 10px 0; text-transform: uppercase; }
         .live-dot { width: 10px; height: 10px; background: #ff4757; border-radius: 50%; animation: pulseRed 1.5s infinite; }
         @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(255, 71, 87, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); } }
 
-        /* Dashboard kartice za ukupne rezultate */
         .summary-dashboard { display: flex; gap: 12px; padding: 0 20px 15px 20px; }
         .summary-card { flex: 1; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; }
         .summary-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: rgba(255,255,255,0.1); }
@@ -87,18 +84,15 @@
         .card-accent-blue::before { background: #3498db; }
         .text-blue { color: #3498db !important; font-size: 32px !important; }
 
-        /* Horizontalni tabovi za biračka mesta */
         .sub-tabs-container { display: flex; gap: 8px; overflow-x: auto; padding: 0 20px 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); scroll-behavior: smooth; }
         .sub-tabs-container::-webkit-scrollbar { height: 4px; }
         .sub-tabs-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
         .sub-tab { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #a0aec0; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; white-space: nowrap; transition: all 0.3s; }
         .sub-tab:hover { background: rgba(255,255,255,0.1); color: white; }
         
-        /* Dinamične boje aktivnog taba prema temi (Narandžasto za izlaznost, Plavo za rezultate) */
         .theme-orange .sub-tab.active { background: #f39c12; color: white; border-color: #f39c12; box-shadow: 0 0 10px rgba(243, 156, 18, 0.4); }
         .theme-blue .sub-tab.active { background: #3498db; color: white; border-color: #3498db; box-shadow: 0 0 10px rgba(52, 152, 219, 0.4); }
 
-        /* Detaljna lista sa animacijama */
         .stat-details-area { padding: 15px 20px; overflow-y: auto; flex: 1; scroll-behavior: smooth; }
         
         @keyframes slideUpFade { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
@@ -218,7 +212,9 @@
                             <input type="password" id="pin-input-${id}" class="profi-input" placeholder="Unesite 6-cifreni kod..." maxlength="6">
                             <button class="profi-submit-btn" onclick="proveriPin('${id}')">Otključaj Tablu</button>
                         </div>`;
-                    L.popup({ closeOnClick: false, autoClose: false }).setLatLng(marker.getLatLng()).setContent(popupContent).openOn(map);
+                    
+                    // closeOnClick: false osigurava da se ne gasi na klik pored table, ali se GASE ostale table
+                    L.popup({ closeOnClick: false }).setLatLng(marker.getLatLng()).setContent(popupContent).openOn(map);
                 });
                 aktivniMarkeri[id] = marker;
             });
@@ -250,7 +246,8 @@
         window.sacuvajUkupanBroj = function(id) {
             let b = document.getElementById(`ukupan-broj-${id}`).value;
             if(!b) return;
-            update(ref(db, 'biracka_mesta/' + id), { ukupan_broj: parseInt(b) }).then(() => alert("Sačuvano!"));
+            // Snima tiho, bez alert-a
+            update(ref(db, 'biracka_mesta/' + id), { ukupan_broj: parseInt(b) });
         };
 
         window.prikaziIzlaznost = function(id) {
@@ -281,6 +278,7 @@
             let s = document.getElementById(`vreme-sat-${id}`).value;
             let m = document.getElementById(`vreme-minut-${id}`).value;
             if(!i) return;
+            // Snima tiho i odmah vraća u glavni meni, te pali panel
             update(ref(db, 'biracka_mesta/' + id), { izaslo: parseInt(i), vreme_update: `${s}:${m}` }).then(() => {
                 prikaziGlavniMeni(id); window.postaviPodTab(id); prikaziGlavniTab('izlaznost'); toggleStatPanel(true);
             });
@@ -312,6 +310,7 @@
                 let v = document.getElementById(`rez-${id}-${idx}`).value;
                 if (v !== '') r[idx] = parseInt(v);
             });
+            // Snima tiho i pali panel
             update(ref(db, 'biracka_mesta/' + id), { rezultati: r }).then(() => {
                 prikaziGlavniMeni(id); window.postaviPodTab(id); prikaziGlavniTab('rezultati'); toggleStatPanel(true);
             });
@@ -327,7 +326,7 @@
                         <input type="text" id="input-broj" class="profi-input" placeholder="Broj">
                         <button id="save-btn" class="profi-submit-btn">Postavi tablu</button>
                     </div>`;
-                L.popup({ closeOnClick: false, autoClose: false }).setLatLng([lat, lng]).setContent(formHtml).openOn(map);
+                L.popup({ closeOnClick: false }).setLatLng([lat, lng]).setContent(formHtml).openOn(map);
                 setTimeout(() => {
                     var btn = document.getElementById('save-btn');
                     if(btn) btn.onclick = function() {
@@ -373,7 +372,6 @@
 
             let sortiranaMestaKeys = Object.keys(globalnaMestaData).sort((a,b) => parseInt(globalnaMestaData[a].broj) - parseInt(globalnaMestaData[b].broj));
 
-            // 1. Zbirni izračuni za CELU opštinu (uvek se računa sve)
             let opstinaUpisano = 0; let opstinaIzaslo = 0;
             let opstinaZbirGlasova = new Array(politickeListe.length).fill(0);
             let opstinaVazeciGlasovi = 0;
@@ -391,7 +389,6 @@
                 }
             });
 
-            // 2. Generisanje UKUPNOG DASHBOARDA na vrhu
             let topHtml = `<div class="opstina-naslov"><div class="live-dot"></div> UŽIVO ZBIRNO (OPŠTINA)</div>`;
             
             if (trenutniGlavniTab === 'izlaznost') {
@@ -411,7 +408,6 @@
                     </div>`;
             }
 
-            // 3. Generisanje POD-TABOVA za Biračka Mesta
             let subTabsHtml = `<div class="sub-tabs-container">
                 <button class="sub-tab ${trenutniPodTab === 'sve' ? 'active' : ''}" onclick="postaviPodTab('sve')">Sva biračka mesta</button>`;
             sortiranaMestaKeys.forEach(id => {
@@ -420,7 +416,6 @@
             });
             subTabsHtml += `</div>`;
 
-            // 4. Generisanje DETALJNE LISTE (zavisno od izabranog pod-taba)
             let detailsHtml = `<div class="stat-details-area">`;
             let mestaZaPrikaz = trenutniPodTab === 'sve' ? sortiranaMestaKeys : [trenutniPodTab];
 
@@ -441,7 +436,6 @@
                 });
                 if(redniBroj === 0) detailsHtml += `<p class="empty-state">Nema unetih podataka o izlaznosti za izabrani pregled.</p>`;
             } else {
-                // Detalji rezultata za izabrani tab
                 let lokalniGlasovi = new Array(politickeListe.length).fill(0);
                 let lokalniVazeci = 0;
 
@@ -485,7 +479,6 @@
             }
             detailsHtml += `</div>`;
 
-            // Spajanje svega u panel
             area.innerHTML = topHtml + subTabsHtml + detailsHtml;
         }
     </script>
