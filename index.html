@@ -26,88 +26,48 @@
             background: #1a1a1a;
         }
 
-        /* Profi GUI bedž prilagođen novom rasporedu */
-        .profi-badge {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 12px;
-            padding: 10px 14px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transform: translate(-50%, -100%);
+        /* Profi tabla sa trouglićem na dnu */
+        .map-pin-container {
             position: relative;
-            white-space: nowrap;
-            transition: all 0.2s ease;
-        }
-
-        .profi-badge:hover {
-            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
-            transform: translate(-50%, -102%);
-        }
-
-        /* Donji streličasti kursor bedža */
-        .profi-badge::after {
-            content: '';
-            position: absolute;
-            bottom: -7px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 8px 7px 0;
-            border-style: solid;
-            border-color: rgba(255, 255, 255, 0.95) transparent;
-            display: block;
-            width: 0;
-        }
-
-        .badge-content {
+            transform: translate(-50%, -100%);
             display: flex;
             flex-direction: column;
-            line-height: 1.3;
+            align-items: center;
+            white-space: nowrap;
         }
 
-        /* Naziv biračkog mesta sada na vrhu, krupniji */
-        .badge-title {
-            font-size: 14px;
+        .map-board {
+            background: #ffffff;
+            border: 2px solid #2c3e50;
+            border-radius: 8px;
+            padding: 6px 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .board-title {
+            font-size: 13px;
             font-weight: 700;
             color: #2c3e50;
-            max-width: 180px;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
-        /* Broj ispod imena */
-        .badge-number {
+        .board-number {
             font-size: 11px;
-            color: #7f8c8d;
+            color: #e74c3c;
             font-weight: 600;
         }
 
-        .badge-number span {
-            color: #3498db;
-            font-weight: 700;
-        }
-
-        .btn-profi-delete {
-            background: #ff4757;
-            color: white;
-            border: none;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s, transform 0.1s;
-        }
-
-        .btn-profi-delete:hover {
-            background: #ff6b81;
-            transform: scale(1.1);
+        /* Mali trouglić (strellica) nadole ispod table */
+        .map-triangle {
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #2c3e50;
+            margin-top: -1px;
         }
 
         /* Staklasti prozor za unos (popup) */
@@ -196,7 +156,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             databaseURL: "https://daxgame-ad90a-default-rtdb.europe-west1.firebasedatabase.app/"
@@ -230,25 +190,25 @@
             Object.keys(data).forEach((id) => {
                 let mesto = data[id];
 
-                // Ažuriran HTML bedž: Ime gore, broj dole
-                var badgeHtml = `
-                    <div class="profi-badge">
-                        <div class="badge-content">
-                            <span class="badge-title" title="${mesto.naziv}">${mesto.naziv}</span>
-                            <span class="badge-number">Broj: <span>${mesto.broj}</span></span>
+                // Kreiranje table sa nazivom gore, brojem ispod i trouglićem na dnu
+                var pinHtml = `
+                    <div class="map-pin-container">
+                        <div class="map-board">
+                            <span class="board-title">${mesto.naziv}</span>
+                            <span class="board-number">Broj: ${mesto.broj}</span>
                         </div>
-                        <button class="btn-profi-delete" onclick="obrisiMesto('${id}', event)" title="Ukloni mesto">✕</button>
+                        <div class="map-triangle"></div>
                     </div>
                 `;
 
-                var profiIcon = L.divIcon({
-                    className: 'custom-profi-icon',
-                    html: badgeHtml,
+                var pinIcon = L.divIcon({
+                    className: 'custom-pin-icon',
+                    html: pinHtml,
                     iconSize: [0, 0],
                     iconAnchor: [0, 0]
                 });
 
-                var marker = L.marker([mesto.lat, mesto.lng], { icon: profiIcon }).addTo(map);
+                var marker = L.marker([mesto.lat, mesto.lng], { icon: pinIcon }).addTo(map);
                 aktivniMarkeri[id] = marker;
             });
         });
@@ -298,15 +258,6 @@
                 }
             }, 100);
         });
-
-        window.obrisiMesto = function(id, event) {
-            event.stopPropagation();
-            if (confirm("Da li ste sigurni da želite da obrišete ovo biračko mesto?")) {
-                remove(ref(db, 'biracka_mesta/' + id)).catch((error) => {
-                    alert("Greška pri brisanju: " + error.message);
-                });
-            }
-        };
     </script>
 
 </body>
