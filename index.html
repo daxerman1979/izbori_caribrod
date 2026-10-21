@@ -55,6 +55,21 @@
 
         #admin-badge { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: white; padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 1000; display: none; box-shadow: 0 4px 10px rgba(231,76,60,0.4); }
 
+        /* NOVO: Admin Desni Meni (Drag & Drop Panel) */
+        #admin-sidebar { position: fixed; right: -320px; top: 0; width: 300px; height: 100vh; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: -5px 0 30px rgba(0,0,0,0.5); z-index: 3000; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; color: white; }
+        #admin-sidebar.open { right: 0; }
+        .admin-sidebar-header { padding: 20px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .admin-sidebar-header h3 { margin: 0; font-size: 16px; color: #3498db; }
+        .admin-sidebar-header p { margin: 5px 0 0 0; font-size: 11px; color: #a0aec0; }
+        .admin-sidebar-content { padding: 15px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        
+        .drag-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 12px; cursor: grab; display: flex; flex-direction: column; gap: 4px; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .drag-item:hover { background: rgba(52, 152, 219, 0.15); border-color: #3498db; transform: translateX(-3px); }
+        .drag-item:active { cursor: grabbing; opacity: 0.8; transform: scale(0.98); }
+        .drag-item-broj { font-size: 11px; color: #f39c12; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .drag-item-naziv { font-size: 14px; font-weight: bold; color: white; }
+
+        /* --- STATISTIKA PANEL --- */
         #stat-panel { position: fixed; bottom: -85vh; left: 0; width: 100%; height: 80vh; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.6); z-index: 2000; transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; color: white; }
         #stat-panel.otvoren { bottom: 0; }
         
@@ -122,6 +137,18 @@
 <body>
 
     <div id="admin-badge">ADMIN REŽIM AKTIVAN</div>
+    
+    <!-- NOVO: Desni Admin Sidebar za prevlačenje (Drag & Drop) -->
+    <div id="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <h3>Biračka Mesta</h3>
+            <p>Prevucite karticu na tačnu lokaciju na mapi da je postavite.</p>
+        </div>
+        <div class="admin-sidebar-content" id="drag-items-container">
+            <!-- Puni se automatski iz JavaScripta -->
+        </div>
+    </div>
+
     <div id="map"></div>
     
     <button id="btn-otvori-stat" onclick="toggleStatPanel(true)">
@@ -158,7 +185,41 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         const isAdmin = urlParams.get('admin') === 'da';
-        if (isAdmin) document.getElementById('admin-badge').style.display = 'block';
+
+        // Tvoj spisak biračkih mesta (ovde možeš dodati/brisati prava mesta)
+        const spisakMestaDragDrop = [
+            { broj: "01", naziv: "OŠ Hristo Botev - Sala" },
+            { broj: "02", naziv: "OŠ Hristo Botev - Hol" },
+            { broj: "03", naziv: "Gimnazija Sv. Kirilo i Metodije" },
+            { broj: "04", naziv: "Dom Kulture" },
+            { broj: "05", naziv: "Sportski centar Park" },
+            { broj: "06", naziv: "Mesna zajednica Željuša" },
+            { broj: "07", naziv: "Mesna zajednica Lukavica" },
+            { broj: "08", naziv: "Biblioteka Detko Petrov" },
+            { broj: "09", naziv: "Vrtić Osmijeh" },
+            { broj: "10", naziv: "Zgrada Opštine" }
+        ];
+
+        if (isAdmin) {
+            document.getElementById('admin-badge').style.display = 'block';
+            document.getElementById('admin-sidebar').classList.add('open');
+            
+            // Popunjavanje desnog menija
+            let dragContainer = document.getElementById('drag-items-container');
+            spisakMestaDragDrop.forEach(mesto => {
+                let div = document.createElement('div');
+                div.className = 'drag-item';
+                div.draggable = true;
+                div.innerHTML = `<span class="drag-item-broj">Biračko mesto br. ${mesto.broj}</span><span class="drag-item-naziv">${mesto.naziv}</span>`;
+                
+                // Kada počne prevlačenje, zapamti podatke
+                div.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('naziv', mesto.naziv);
+                    e.dataTransfer.setData('broj', mesto.broj);
+                });
+                dragContainer.appendChild(div);
+            });
+        }
 
         var map = L.map('map', { zoomControl: false }).setView([43.0186, 22.7447], 14);
         L.control.zoom({ position: 'topleft' }).addTo(map);
@@ -326,29 +387,58 @@
             });
         };
 
+        // ADMIN LOGIKA: KREIRANJE PREKO KLIKA ILI DRAG & DROP
         if (isAdmin) {
-            map.on('click', function(e) {
-                var lat = e.latlng.lat; var lng = e.latlng.lng;
-                var formHtml = `
-                    <div class="profi-form">
-                        <h4>Novo Biračko Mesto</h4>
-                        <input type="text" id="input-naziv" class="profi-input" placeholder="Naziv">
-                        <input type="text" id="input-broj" class="profi-input" placeholder="Broj mesta">
-                        <input type="text" id="input-pin" class="profi-input" placeholder="Šifra za pristup (npr. 8844)">
-                        <button id="save-btn" class="profi-submit-btn">Postavi tablu</button>
-                    </div>`;
-                L.popup({ closeOnClick: false }).setLatLng([lat, lng]).setContent(formHtml).openOn(map);
-                setTimeout(() => {
-                    var btn = document.getElementById('save-btn');
-                    if(btn) btn.onclick = function() {
-                        var n = document.getElementById('input-naziv').value.trim();
-                        var b = document.getElementById('input-broj').value.trim();
-                        var p = document.getElementById('input-pin').value.trim();
-                        if(!n || !b || !p) return alert("Popunite sva 3 polja!");
-                        push(mestaRef, { lat: lat, lng: lng, naziv: n, broj: b, pin: p }).then(() => map.closePopup());
-                    };
-                }, 100);
+            let mapContainer = document.getElementById('map');
+            
+            // 1. Dozvoli ispuštanje
+            mapContainer.addEventListener('dragover', (e) => { e.preventDefault(); });
+            
+            // 2. Kada se pusti kartica
+            mapContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                let prevuceniNaziv = e.dataTransfer.getData('naziv');
+                let prevuceniBroj = e.dataTransfer.getData('broj');
+                if (!prevuceniNaziv || !prevuceniBroj) return;
+
+                // Računanje tačnih koordinata na osnovu lokacije miša prilikom dropa
+                var rect = mapContainer.getBoundingClientRect();
+                var latlng = map.containerPointToLatLng([e.clientX - rect.left, e.clientY - rect.top]);
+
+                prikaziAdminFormu(latlng.lat, latlng.lng, prevuceniNaziv, prevuceniBroj);
             });
+
+            // Fallback ako klikne praznu mapu
+            map.on('click', function(e) {
+                prikaziAdminFormu(e.latlng.lat, e.latlng.lng, '', '');
+            });
+        }
+
+        // Globalna funkcija za admin formu
+        function prikaziAdminFormu(lat, lng, prefilledNaziv, prefilledBroj) {
+            var formHtml = `
+                <div class="profi-form">
+                    <h4>Podešavanje Lokacije</h4>
+                    <label>Naziv mesta</label>
+                    <input type="text" id="input-naziv" class="profi-input" value="${prefilledNaziv}" placeholder="Naziv">
+                    <label>Broj mesta</label>
+                    <input type="text" id="input-broj" class="profi-input" value="${prefilledBroj}" placeholder="Broj mesta">
+                    <label>Sigurnosni PIN</label>
+                    <input type="text" id="input-pin" class="profi-input" placeholder="Šifra za pristup (npr. 8844)">
+                    <button id="save-btn" class="profi-submit-btn" style="margin-top: 5px;">Postavi na mapu</button>
+                </div>`;
+            L.popup({ closeOnClick: false }).setLatLng([lat, lng]).setContent(formHtml).openOn(map);
+            
+            setTimeout(() => {
+                var btn = document.getElementById('save-btn');
+                if(btn) btn.onclick = function() {
+                    var n = document.getElementById('input-naziv').value.trim();
+                    var b = document.getElementById('input-broj').value.trim();
+                    var p = document.getElementById('input-pin').value.trim();
+                    if(!n || !b || !p) return alert("Popunite sva 3 polja!");
+                    push(mestaRef, { lat: lat, lng: lng, naziv: n, broj: b, pin: p }).then(() => map.closePopup());
+                };
+            }, 100);
         }
 
         // --- STATISTIKA I EKSPORT ---
