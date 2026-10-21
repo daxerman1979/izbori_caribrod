@@ -21,8 +21,8 @@
         .map-board { background: #ffffff; border-radius: 8px; padding: 8px 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 90px; max-width: 220px; transition: all 0.2s ease; position: relative; }
         .live-turnout { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 12px; margin-bottom: 4px; box-shadow: 0 2px 8px rgba(243, 156, 18, 0.5); display: flex; align-items: center; gap: 5px; white-space: nowrap; }
         
-        .board-title { font-size: 13px; font-weight: 800; color: #1e293b; text-align: center; line-height: 1.2; }
-        .board-number { font-size: 11px; color: #ef4444; font-weight: 700; background: #fee2e2; padding: 2px 10px; border-radius: 12px; }
+        .board-title { font-size: 13px; font-weight: 800; color: #1e293b; text-align: center; line-height: 1.2; text-transform: uppercase; }
+        .board-number { font-size: 11px; color: #ef4444; font-weight: 700; background: #fee2e2; padding: 2px 10px; border-radius: 12px; text-transform: uppercase; }
         .map-triangle { width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #ffffff; margin-top: -1px; }
 
         .leaflet-popup-tip-container { display: none !important; }
@@ -32,7 +32,7 @@
         .leaflet-popup-close-button:hover { color: #ff4757 !important; }
 
         .profi-form { display: flex; flex-direction: column; gap: 10px; width: 260px; padding: 8px; }
-        .profi-form h4 { margin: 0 0 5px 0; font-size: 15px; font-weight: 600; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; text-align: center; }
+        .profi-form h4 { margin: 0 0 5px 0; font-size: 15px; font-weight: 600; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; text-align: center; text-transform: uppercase; }
 
         .board-section { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
         .profi-input { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 10px; color: white; font-size: 13px; outline: none; width: 100%; box-sizing: border-box; }
@@ -46,7 +46,7 @@
         .rezultat-red { display: flex; flex-direction: column; gap: 4px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); }
         .rezultat-red label { white-space: normal; word-wrap: break-word; color: #ecf0f1; font-size: 11px; margin-bottom: 2px; }
 
-        .profi-submit-btn { background: linear-gradient(135deg, #2ed573, #26af5f); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); transition: opacity 0.2s, transform 0.1s; }
+        .profi-submit-btn { background: linear-gradient(135deg, #2ed573, #26af5f); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); transition: opacity 0.2s, transform 0.1s; text-transform: uppercase; }
         .profi-submit-btn:hover { opacity: 0.9; }
         .btn-nazad { background: #7f8c8d; }
         .btn-izlaznost { background: linear-gradient(135deg, #f39c12, #d35400); }
@@ -55,11 +55,11 @@
 
         #admin-badge { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: white; padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 1000; display: none; box-shadow: 0 4px 10px rgba(231,76,60,0.4); }
 
-        /* NOVO: Admin Desni Meni (Drag & Drop Panel) */
+        /* Admin Desni Meni */
         #admin-sidebar { position: fixed; right: -320px; top: 0; width: 300px; height: 100vh; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: -5px 0 30px rgba(0,0,0,0.5); z-index: 3000; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; color: white; }
         #admin-sidebar.open { right: 0; }
         .admin-sidebar-header { padding: 20px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
-        .admin-sidebar-header h3 { margin: 0; font-size: 16px; color: #3498db; }
+        .admin-sidebar-header h3 { margin: 0; font-size: 16px; color: #3498db; text-transform: uppercase; }
         .admin-sidebar-header p { margin: 5px 0 0 0; font-size: 11px; color: #a0aec0; }
         .admin-sidebar-content { padding: 15px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 10px; }
         
@@ -67,7 +67,7 @@
         .drag-item:hover { background: rgba(52, 152, 219, 0.15); border-color: #3498db; transform: translateX(-3px); }
         .drag-item:active { cursor: grabbing; opacity: 0.8; transform: scale(0.98); }
         .drag-item-broj { font-size: 11px; color: #f39c12; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-        .drag-item-naziv { font-size: 14px; font-weight: bold; color: white; }
+        .drag-item-naziv { font-size: 14px; font-weight: bold; color: white; text-transform: uppercase; }
 
         /* --- STATISTIKA PANEL --- */
         #stat-panel { position: fixed; bottom: -85vh; left: 0; width: 100%; height: 80vh; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.6); z-index: 2000; transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; color: white; }
@@ -106,7 +106,7 @@
         .sub-tabs-container { display: flex; gap: 8px; overflow-x: auto; padding: 0 20px 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); scroll-behavior: smooth; }
         .sub-tabs-container::-webkit-scrollbar { height: 4px; }
         .sub-tabs-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
-        .sub-tab { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #a0aec0; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; white-space: nowrap; transition: all 0.3s; }
+        .sub-tab { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #a0aec0; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; white-space: nowrap; transition: all 0.3s; text-transform: uppercase; }
         .sub-tab:hover { background: rgba(255,255,255,0.1); color: white; }
         
         .theme-orange .sub-tab.active { background: #f39c12; color: white; border-color: #f39c12; box-shadow: 0 0 10px rgba(243, 156, 18, 0.4); }
@@ -119,17 +119,17 @@
 
         .stat-row { background: rgba(255,255,255,0.02); border-radius: 10px; padding: 12px 15px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); opacity: 0; animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; position: relative; overflow: hidden; }
         .stat-row:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
-        .stat-row-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; font-size: 13px; line-height: 1.3; position: relative; z-index: 2; }
+        .stat-row-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; font-size: 13px; line-height: 1.3; position: relative; z-index: 2; text-transform: uppercase; }
         
         .progress-bg { width: 100%; height: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden; margin-top: 5px; position: relative; z-index: 2; }
         .progress-fill { height: 100%; width: var(--target-width); animation: fillProgress 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         .bg-orange { background: linear-gradient(90deg, #f39c12, #e67e22); }
         .bg-blue { background: linear-gradient(90deg, #3498db, #2980b9); }
         
-        .stat-time { font-size: 11px; color: #a0aec0; margin-top: 8px; display: flex; justify-content: space-between; position: relative; z-index: 2; }
+        .stat-time { font-size: 11px; color: #a0aec0; margin-top: 8px; display: flex; justify-content: space-between; position: relative; z-index: 2; text-transform: uppercase; }
         .empty-state { text-align: center; color: #a0aec0; padding: 30px; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;}
 
-        #btn-otvori-stat { position: absolute; bottom: 20px; right: 20px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; padding: 14px 22px; border-radius: 30px; font-weight: bold; z-index: 1000; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: transform 0.2s; display: flex; align-items: center; gap: 8px; font-size: 14px;}
+        #btn-otvori-stat { position: absolute; bottom: 20px; right: 20px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; padding: 14px 22px; border-radius: 30px; font-weight: bold; z-index: 1000; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: transform 0.2s; display: flex; align-items: center; gap: 8px; font-size: 14px; text-transform: uppercase;}
         #btn-otvori-stat:hover { transform: scale(1.05); }
         .btn-live-dot { width: 10px; height: 10px; background: #fff; border-radius: 50%; animation: pulseRed 1.5s infinite; }
     </style>
@@ -138,14 +138,13 @@
 
     <div id="admin-badge">ADMIN REŽIM AKTIVAN</div>
     
-    <!-- NOVO: Desni Admin Sidebar za prevlačenje (Drag & Drop) -->
     <div id="admin-sidebar">
         <div class="admin-sidebar-header">
             <h3>Biračka Mesta</h3>
             <p>Prevucite karticu na tačnu lokaciju na mapi da je postavite.</p>
         </div>
         <div class="admin-sidebar-content" id="drag-items-container">
-            <!-- Puni se automatski iz JavaScripta -->
+            <!-- Puni se automatski -->
         </div>
     </div>
 
@@ -186,38 +185,36 @@
         const urlParams = new URLSearchParams(window.location.search);
         const isAdmin = urlParams.get('admin') === 'da';
 
-        // Tvoj spisak biračkih mesta (ovde možeš dodati/brisati prava mesta)
         const spisakMestaDragDrop = [
-    { broj: "01", naziv: "NARODNA BIBLIOTEKA – DIMITROVGRAD, UL. SUTJESKA BR. 2" },
-    { broj: "02", naziv: "STACIONAR – DIMITROVGRAD, UL. SUTJESKA BB" },
-    { broj: "03", naziv: "GIMNAZIJA „SV. KIRILA I METODIJA\" – DIMITROVGRAD, UL. ĆIRILA I METODIJA BR. 12" },
-    { broj: "04", naziv: "DEČJI VRTIĆ – DIMITROVGRAD, UL. SVETOSAVSKA BR. 2" },
-    { broj: "05", naziv: "UPRAVA JP „KOMUNALAC\" – DIMITROVGRAD, UL. IVO ANDRIĆ 49" },
-    { broj: "06", naziv: "OSNOVNA ŠKOLA – DIMITROVGRAD, UL. HRISTO BOTEV BR. 3" },
-    { broj: "07", naziv: "CENTAR ZA KULTURU – DIMITROVGRAD, TRG DR ZORANA ĐINĐIĆA BR. 2" },
-    { broj: "08", naziv: "DEČIJI VRTIĆ – DIMITROVGRAD, UL. BOŠKO BUHA BB" },
-    { broj: "09", naziv: "ZGRADA ŠPEDICIJE NA ŽELEZNIČKOJ STANICI – DIMITROVGRAD, UL. BALKANSKA BR. 124" },
-    { broj: "10", naziv: "DOM KULTURE – SELO LUKAVICA, UL. LUKAVAČKA BR. 31" },
-    { broj: "11", naziv: "DOM KULTURE – NASELJE BELEŠ, UL. BELEŠ BB" },
-    { broj: "12", naziv: "DOM KULTURE – SELO ŽELJUŠA, UL. GEORGI DIMITROVA BR. 139" },
-    { broj: "13", naziv: "OSNOVNA ŠKOLA – SELO ŽELJUŠA, UL. STOČAR (OBJEKAT BR. 3)" },
-    { broj: "14", naziv: "DOM KULTURE.. – SELO GOJIN DOL, UL. BORISA IVANOVA BR. 72" },
-    { broj: "15", naziv: "OSNOVNA ŠKOLA – SELO GRADINJE, UL. BAČEVSKA BR. 37" },
-    { broj: "16", naziv: "ZADRUŽNI DOM – SELO KUSA VRANA, UL. SELO BR. 62" },
-    { broj: "17", naziv: "DOM KULTURE – SELO TRNSKI ODOROVCI, UL. TRNSKI ODOROVCI BR. 148" },
-    { broj: "18", naziv: "ZADRUŽNI DOM – SELO DONJA NEVLJA, UL. DONJA NEVLJA BR. 109" },
-    { broj: "19", naziv: "DOM KULTURE – SELO POGANOVO, UL. POGANOVO BR. 64" },
-    { broj: "20", naziv: "DOM KULTURE – SELO VISOČKI ODOROVCI, UL. VISOČKI ODOROVCI BR. 166" },
-    { broj: "21", naziv: "DOM KULTURE – SELO SMILOVCI, UL. SMILOVCI BR. 21A" },
-    { broj: "22", naziv: "DOM KULTURE – SELO PROTOPOPINCI, UL. PROTOPOPINCI BR. 42" },
-    { broj: "23", naziv: "AMBULANTA DOMA ZDRAVLJA DIMITROVGRAD – SELO IZATOVCI, UL. BABINA NJIVA BR. 56" }
-];
+            { broj: "01", naziv: "NARODNA BIBLIOTEKA – DIMITROVGRAD, UL. SUTJESKA BR. 2" },
+            { broj: "02", naziv: "STACIONAR – DIMITROVGRAD, UL. SUTJESKA BB" },
+            { broj: "03", naziv: "GIMNAZIJA „SV. KIRILA I METODIJA\" – DIMITROVGRAD, UL. ĆIRILA I METODIJA BR. 12" },
+            { broj: "04", naziv: "DEČJI VRTIĆ – DIMITROVGRAD, UL. SVETOSAVSKA BR. 2" },
+            { broj: "05", naziv: "UPRAVA JP „KOMUNALAC\" – DIMITROVGRAD, UL. IVO ANDRIĆ 49" },
+            { broj: "06", naziv: "OSNOVNA ŠKOLA – DIMITROVGRAD, UL. HRISTO BOTEV BR. 3" },
+            { broj: "07", naziv: "CENTAR ZA KULTURU – DIMITROVGRAD, TRG DR ZORANA ĐINĐIĆA BR. 2" },
+            { broj: "08", naziv: "DEČIJI VRTIĆ – DIMITROVGRAD, UL. BOŠKO BUHA BB" },
+            { broj: "09", naziv: "ZGRADA ŠPEDICIJE NA ŽELEZNIČKOJ STANICI – DIMITROVGRAD, UL. BALKANSKA BR. 124" },
+            { broj: "10", naziv: "DOM KULTURE – SELO LUKAVICA, UL. LUKAVAČKA BR. 31" },
+            { broj: "11", naziv: "DOM KULTURE – NASELJE BELEŠ, UL. BELEŠ BB" },
+            { broj: "12", naziv: "DOM KULTURE – SELO ŽELJUŠA, UL. GEORGI DIMITROVA BR. 139" },
+            { broj: "13", naziv: "OSNOVNA ŠKOLA – SELO ŽELJUŠA, UL. STOČAR (OBJEKAT BR. 3)" },
+            { broj: "14", naziv: "DOM KULTURE.. – SELO GOJIN DOL, UL. BORISA IVANOVA BR. 72" },
+            { broj: "15", naziv: "OSNOVNA ŠKOLA – SELO GRADINJE, UL. BAČEVSКА BR. 37" },
+            { broj: "16", naziv: "ZADRUŽNI DOM – SELO KUSA VRANA, UL. SELO BR. 62" },
+            { broj: "17", naziv: "DOM KULTURE – SELO TRNSKI ODOROVCI, UL. TRNSKI ODOROVCI BR. 148" },
+            { broj: "18", naziv: "ZADRUŽNI DOM – SELO DONJA NEVLJA, UL. DONJA NEVLJA BR. 109" },
+            { broj: "19", naziv: "DOM KULTURE – SELO POGANOVO, UL. POGANOVO BR. 64" },
+            { broj: "20", naziv: "DOM KULTURE – SELO VISOČKI ODOROVCI, UL. VISOČKI ODOROVCI BR. 166" },
+            { broj: "21", naziv: "DOM KULTURE – SELO SMILOVCI, UL. SMILOVCI BR. 21A" },
+            { broj: "22", naziv: "DOM KULTURE – SELO PROTOPOPINCI, UL. PROTOPOPINCI BR. 42" },
+            { broj: "23", naziv: "AMBULANTA DOMA ZDRAVLJA DIMITROVGRAD – SELO IZATOVCI, UL. BABINA NJIVA BR. 56" }
+        ];
 
         if (isAdmin) {
             document.getElementById('admin-badge').style.display = 'block';
             document.getElementById('admin-sidebar').classList.add('open');
             
-            // Popunjavanje desnog menija
             let dragContainer = document.getElementById('drag-items-container');
             spisakMestaDragDrop.forEach(mesto => {
                 let div = document.createElement('div');
@@ -225,7 +222,6 @@
                 div.draggable = true;
                 div.innerHTML = `<span class="drag-item-broj">Biračko mesto br. ${mesto.broj}</span><span class="drag-item-naziv">${mesto.naziv}</span>`;
                 
-                // Kada počne prevlačenje, zapamti podatke
                 div.addEventListener('dragstart', (e) => {
                     e.dataTransfer.setData('naziv', mesto.naziv);
                     e.dataTransfer.setData('broj', mesto.broj);
@@ -277,7 +273,7 @@
                         <div class="map-board">
                             ${izlaznostHtml}
                             <span class="board-title">${mesto.naziv}</span>
-                            <span class="board-number">Broj: ${mesto.broj}</span>
+                            <span class="board-number">BR: ${mesto.broj}</span>
                         </div>
                         <div class="map-triangle"></div>
                     </div>`;
@@ -290,8 +286,9 @@
                     let popupContent = `
                         <div class="profi-form" id="popup-content-${id}">
                             <h4>Zaštićen pristup</h4>
-                            <input type="password" id="pin-input-${id}" class="profi-input" placeholder="Unesite kod za ovo mesto..." maxlength="10">
-                            <button class="profi-submit-btn" onclick="proveriPin('${id}')">Otključaj Tablu</button>
+                            <!-- oninput prebacuje vizuelno u velika slova -->
+                            <input type="password" id="pin-input-${id}" class="profi-input" placeholder="UNESITE KOD..." maxlength="15" oninput="this.value = this.value.toUpperCase()">
+                            <button class="profi-submit-btn" onclick="proveriPin('${id}')">OTKLJUČAJ TABLU</button>
                         </div>`;
                     
                     L.popup({ closeOnClick: false }).setLatLng(marker.getLatLng()).setContent(popupContent).openOn(map);
@@ -301,9 +298,10 @@
         });
 
         window.proveriPin = function(id) {
-            let uneseniPin = document.getElementById(`pin-input-${id}`).value;
+            // Sigurnost: Iza kulisa takođe obavezno prevodimo u velika slova pre provere
+            let uneseniPin = document.getElementById(`pin-input-${id}`).value.trim().toUpperCase();
             let mesto = window.globalnaMestaData[id];
-            let tacanPin = mesto.pin ? mesto.pin : '123456';
+            let tacanPin = mesto.pin ? mesto.pin.toUpperCase() : '123456';
             
             if (uneseniPin === tacanPin) { 
                 prikaziGlavniMeni(id); 
@@ -316,15 +314,15 @@
             let mesto = window.globalnaMestaData[id];
             let sadrzaj = `
                 <div class="profi-form">
-                    <h4>Kontrolna Tabla</h4>
+                    <h4>KONTROLNA TABLA</h4>
                     <div class="board-section">
-                        <label>Upisani birači po spisku</label>
+                        <label>UPISANI BIRAČI PO SPISKU</label>
                         <input type="number" id="ukupan-broj-${id}" class="profi-input" value="${mesto.ukupan_broj || ''}">
-                        <button class="profi-submit-btn" style="padding: 6px; margin-top: 2px;" onclick="sacuvajUkupanBroj('${id}')">Sačuvaj</button>
+                        <button class="profi-submit-btn" style="padding: 6px; margin-top: 2px;" onclick="sacuvajUkupanBroj('${id}')">SAČUVAJ</button>
                     </div>
                     <div class="btn-row" style="margin-top: 5px;">
-                        <button class="profi-submit-btn btn-izlaznost" onclick="prikaziIzlaznost('${id}')">Izlaznost</button>
-                        <button class="profi-submit-btn btn-rezultati" onclick="prikaziRezultate('${id}')">Rezultati</button>
+                        <button class="profi-submit-btn btn-izlaznost" onclick="prikaziIzlaznost('${id}')">IZLAZNOST</button>
+                        <button class="profi-submit-btn btn-rezultati" onclick="prikaziRezultate('${id}')">REZULTATI</button>
                     </div>
                 </div>`;
             document.getElementById(`popup-content-${id}`).innerHTML = sadrzaj;
@@ -340,11 +338,11 @@
             let mesto = window.globalnaMestaData[id];
             let sadrzaj = `
                 <div class="profi-form">
-                    <h4>Unos Izlaznosti</h4>
+                    <h4>UNOS IZLAZNOSTI</h4>
                     <div class="board-section">
-                        <label>Izašlo birača:</label>
+                        <label>IZAŠLO BIRAČA:</label>
                         <input type="number" id="izaslo-${id}" class="profi-input" value="${mesto.izaslo || ''}">
-                        <label style="margin-top:5px;">Do (vreme):</label>
+                        <label style="margin-top:5px;">DO (VREME):</label>
                         <div class="btn-row">
                             <select id="vreme-sat-${id}" class="profi-input">${getSatiOptions()}</select>
                             <span style="color:white; align-self:center;">:</span>
@@ -352,8 +350,8 @@
                         </div>
                     </div>
                     <div class="btn-row" style="margin-top: 5px;">
-                        <button class="profi-submit-btn btn-nazad" onclick="prikaziGlavniMeni('${id}')">Nazad</button>
-                        <button class="profi-submit-btn" onclick="sacuvajIzlaznost('${id}')">Snimi</button>
+                        <button class="profi-submit-btn btn-nazad" onclick="prikaziGlavniMeni('${id}')">NAZAD</button>
+                        <button class="profi-submit-btn" onclick="sacuvajIzlaznost('${id}')">SNIMI</button>
                     </div>
                 </div>`;
             document.getElementById(`popup-content-${id}`).innerHTML = sadrzaj;
@@ -374,16 +372,16 @@
             let r = mesto.rezultati || {};
             let inps = window.politickeListe.map((ime, idx) => `
                 <div class="rezultat-red">
-                    <label>${idx + 1}. ${ime}</label>
+                    <label>${idx + 1}. ${ime.toUpperCase()}</label>
                     <input type="number" id="rez-${id}-${idx}" class="profi-input" value="${r[idx] !== undefined ? r[idx] : ''}">
                 </div>`).join('');
             let sadrzaj = `
                 <div class="profi-form" style="width: 280px;">
-                    <h4>Unos Rezultata</h4>
+                    <h4>UNOS REZULTATA</h4>
                     <div class="rezultati-lista">${inps}</div>
                     <div class="btn-row" style="margin-top: 8px;">
-                        <button class="profi-submit-btn btn-nazad" onclick="prikaziGlavniMeni('${id}')">Nazad</button>
-                        <button class="profi-submit-btn" onclick="sacuvajRezultate('${id}')">Snimi</button>
+                        <button class="profi-submit-btn btn-nazad" onclick="prikaziGlavniMeni('${id}')">NAZAD</button>
+                        <button class="profi-submit-btn" onclick="sacuvajRezultate('${id}')">SNIMI</button>
                     </div>
                 </div>`;
             document.getElementById(`popup-content-${id}`).innerHTML = sadrzaj;
@@ -400,55 +398,49 @@
             });
         };
 
-        // ADMIN LOGIKA: KREIRANJE PREKO KLIKA ILI DRAG & DROP
         if (isAdmin) {
             let mapContainer = document.getElementById('map');
-            
-            // 1. Dozvoli ispuštanje
             mapContainer.addEventListener('dragover', (e) => { e.preventDefault(); });
-            
-            // 2. Kada se pusti kartica
             mapContainer.addEventListener('drop', (e) => {
                 e.preventDefault();
                 let prevuceniNaziv = e.dataTransfer.getData('naziv');
                 let prevuceniBroj = e.dataTransfer.getData('broj');
                 if (!prevuceniNaziv || !prevuceniBroj) return;
 
-                // Računanje tačnih koordinata na osnovu lokacije miša prilikom dropa
                 var rect = mapContainer.getBoundingClientRect();
                 var latlng = map.containerPointToLatLng([e.clientX - rect.left, e.clientY - rect.top]);
-
                 prikaziAdminFormu(latlng.lat, latlng.lng, prevuceniNaziv, prevuceniBroj);
             });
 
-            // Fallback ako klikne praznu mapu
             map.on('click', function(e) {
                 prikaziAdminFormu(e.latlng.lat, e.latlng.lng, '', '');
             });
         }
 
-        // Globalna funkcija za admin formu
         function prikaziAdminFormu(lat, lng, prefilledNaziv, prefilledBroj) {
+            // oninput polja za forsiranje velikih slova dok se kuca
             var formHtml = `
                 <div class="profi-form">
-                    <h4>Podešavanje Lokacije</h4>
-                    <label>Naziv mesta</label>
-                    <input type="text" id="input-naziv" class="profi-input" value="${prefilledNaziv}" placeholder="Naziv">
-                    <label>Broj mesta</label>
-                    <input type="text" id="input-broj" class="profi-input" value="${prefilledBroj}" placeholder="Broj mesta">
-                    <label>Sigurnosni PIN</label>
-                    <input type="text" id="input-pin" class="profi-input" placeholder="Šifra za pristup (npr. 8844)">
-                    <button id="save-btn" class="profi-submit-btn" style="margin-top: 5px;">Postavi na mapu</button>
+                    <h4>PODEŠAVANJE LOKACIJE</h4>
+                    <label>NAZIV MESTA</label>
+                    <input type="text" id="input-naziv" class="profi-input" value="${prefilledNaziv}" placeholder="NAZIV" oninput="this.value = this.value.toUpperCase()">
+                    <label>BROJ MESTA</label>
+                    <input type="text" id="input-broj" class="profi-input" value="${prefilledBroj}" placeholder="BROJ" oninput="this.value = this.value.toUpperCase()">
+                    <label>SIGURNOSNI PIN</label>
+                    <input type="text" id="input-pin" class="profi-input" placeholder="ŠIFRA (PIN)" oninput="this.value = this.value.toUpperCase()">
+                    <button id="save-btn" class="profi-submit-btn" style="margin-top: 5px;">POSTAVI NA MAPU</button>
                 </div>`;
             L.popup({ closeOnClick: false }).setLatLng([lat, lng]).setContent(formHtml).openOn(map);
             
             setTimeout(() => {
                 var btn = document.getElementById('save-btn');
                 if(btn) btn.onclick = function() {
-                    var n = document.getElementById('input-naziv').value.trim();
-                    var b = document.getElementById('input-broj').value.trim();
-                    var p = document.getElementById('input-pin').value.trim();
-                    if(!n || !b || !p) return alert("Popunite sva 3 polja!");
+                    // Iza kulisa uvek prebacujemo u velika slova za bazu
+                    var n = document.getElementById('input-naziv').value.trim().toUpperCase();
+                    var b = document.getElementById('input-broj').value.trim().toUpperCase();
+                    var p = document.getElementById('input-pin').value.trim().toUpperCase();
+                    
+                    if(!n || !b || !p) return alert("Popunite sva 3 polja (uključujući šifru)!");
                     push(mestaRef, { lat: lat, lng: lng, naziv: n, broj: b, pin: p }).then(() => map.closePopup());
                 };
             }, 100);
@@ -485,7 +477,7 @@
             
             let table = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body><table border="1">`;
             table += `<tr><th>Biračko mesto</th><th>Upisani birači</th><th>Izašlo birača</th><th>Izlaznost (%)</th><th>Važeći glasovi</th>`;
-            window.politickeListe.forEach(l => { table += `<th>${l}</th>`; });
+            window.politickeListe.forEach(l => { table += `<th>${l.toUpperCase()}</th>`; });
             table += `</tr>`;
             
             let sortiranaMestaKeys = Object.keys(window.globalnaMestaData).sort((a,b) => parseInt(window.globalnaMestaData[a].broj) - parseInt(window.globalnaMestaData[b].broj));
@@ -525,7 +517,7 @@
         window.azurirajStatistiku = function() {
             let area = document.getElementById('stat-content-area');
             if(!window.globalnaMestaData || Object.keys(window.globalnaMestaData).length === 0) { 
-                area.innerHTML = "<p class='empty-state'>Nema unetih podataka u bazi.</p>"; return; 
+                area.innerHTML = "<p class='empty-state'>NEMA UNETIH PODATAKA.</p>"; return; 
             }
 
             let sortiranaMestaKeys = Object.keys(window.globalnaMestaData).sort((a,b) => parseInt(window.globalnaMestaData[a].broj) - parseInt(window.globalnaMestaData[b].broj));
@@ -550,21 +542,21 @@
                 let totalProc = opstinaUpisano > 0 ? ((opstinaIzaslo / opstinaUpisano) * 100).toFixed(1) : 0;
                 topHtml += `
                     <div class="summary-dashboard">
-                        <div class="summary-card"><h3>${opstinaUpisano}</h3><p>Upisanih birača</p></div>
-                        <div class="summary-card"><h3>${opstinaIzaslo}</h3><p>Izašlo na glasanje</p></div>
-                        <div class="summary-card card-accent-orange"><h3 class="text-orange">${totalProc}%</h3><p>Ukupna Izlaznost</p></div>
+                        <div class="summary-card"><h3>${opstinaUpisano}</h3><p>UPISANIH BIRAČA</p></div>
+                        <div class="summary-card"><h3>${opstinaIzaslo}</h3><p>IZAŠLO NA GLASANJE</p></div>
+                        <div class="summary-card card-accent-orange"><h3 class="text-orange">${totalProc}%</h3><p>UKUPNA IZLAZNOST</p></div>
                     </div>`;
             } else {
                 topHtml += `
                     <div class="summary-dashboard">
                         <div class="summary-card card-accent-blue" style="padding: 20px;">
-                            <h3 class="text-blue">${opstinaVazeciGlasovi}</h3><p style="font-size:12px;">Ukupno prebrojanih i važećih glasova u opštini</p>
+                            <h3 class="text-blue">${opstinaVazeciGlasovi}</h3><p style="font-size:12px;">UKUPNO VAŽEĆIH GLASOVA U OPŠTINI</p>
                         </div>
                     </div>`;
             }
 
             let subTabsHtml = `<div class="sub-tabs-container">
-                <button class="sub-tab ${trenutniPodTab === 'sve' ? 'active' : ''}" onclick="postaviPodTab('sve')">Sva biračka mesta</button>`;
+                <button class="sub-tab ${trenutniPodTab === 'sve' ? 'active' : ''}" onclick="postaviPodTab('sve')">SVA BIRAČKA MESTA</button>`;
             sortiranaMestaKeys.forEach(id => {
                 let m = window.globalnaMestaData[id];
                 subTabsHtml += `<button class="sub-tab ${trenutniPodTab === id ? 'active' : ''}" onclick="postaviPodTab('${id}')">${m.broj}. ${m.naziv}</button>`;
@@ -582,14 +574,14 @@
                         let p = ((i / u) * 100).toFixed(1);
                         detailsHtml += `
                             <div class="stat-row" style="animation-delay: ${redniBroj * 0.05}s">
-                                <div class="stat-row-header"><span>Br. ${m.broj} - ${m.naziv}</span> <span style="color:#f39c12;">${p}%</span></div>
+                                <div class="stat-row-header"><span>BR. ${m.broj} - ${m.naziv}</span> <span style="color:#f39c12;">${p}%</span></div>
                                 <div class="progress-bg"><div class="progress-fill bg-orange" style="--target-width: ${p}%"></div></div>
-                                <div class="stat-time"><span>Izašlo: <b style="color:white">${i}/${u}</b></span> <span>Vreme unosa: ${m.vreme_update ? m.vreme_update+'h' : 'Nema'}</span></div>
+                                <div class="stat-time"><span>IZAŠLO: <b style="color:white">${i}/${u}</b></span> <span>VREME UNOSA: ${m.vreme_update ? m.vreme_update+'h' : 'NEMA'}</span></div>
                             </div>`;
                         redniBroj++;
                     }
                 });
-                if(redniBroj === 0) detailsHtml += `<p class="empty-state">Nema unetih podataka o izlaznosti za izabrani pregled.</p>`;
+                if(redniBroj === 0) detailsHtml += `<p class="empty-state">NEMA UNETIH PODATAKA O IZLAZNOSTI.</p>`;
             } else {
                 let lokalniGlasovi = new Array(window.politickeListe.length).fill(0);
                 let lokalniVazeci = 0;
@@ -606,7 +598,7 @@
                 });
 
                 if (lokalniVazeci === 0) {
-                    detailsHtml += `<p class="empty-state">Nema unetih rezultata glasanja za izabrani pregled.</p>`;
+                    detailsHtml += `<p class="empty-state">NEMA UNETIH REZULTATA GLASANJA.</p>`;
                 } else {
                     let stranke = window.politickeListe.map((ime, idx) => {
                         let g = lokalniGlasovi[idx];
@@ -614,19 +606,19 @@
                         return { ime, broj: idx + 1, glasovi: g, procenat: parseFloat(p) };
                     }).filter(s => s.glasovi > 0).sort((a,b) => b.glasovi - a.glasovi);
 
-                    let naslovReza = trenutniPodTab === 'sve' ? "Zbirno glasanje - Sva mesta" : `Rezultati - ${window.globalnaMestaData[trenutniPodTab].naziv}`;
-                    detailsHtml += `<p style="text-align:center; color:#a0aec0; font-size:12px; font-weight:bold; margin-top:0;">${naslovReza} (${lokalniVazeci} glasova)</p>`;
+                    let naslovReza = trenutniPodTab === 'sve' ? "ZBIRNO GLASANJE - SVA MESTA" : `REZULTATI - ${window.globalnaMestaData[trenutniPodTab].naziv}`;
+                    detailsHtml += `<p style="text-align:center; color:#a0aec0; font-size:12px; font-weight:bold; margin-top:0;">${naslovReza} (${lokalniVazeci} GLASOVA)</p>`;
 
                     let redniBroj = 0;
                     stranke.forEach(s => {
                         detailsHtml += `
                             <div class="stat-row" style="animation-delay: ${redniBroj * 0.05}s">
                                 <div class="stat-row-header">
-                                    <span style="flex:1; padding-right:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${s.ime}">${s.broj}. ${s.ime}</span> 
+                                    <span style="flex:1; padding-right:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${s.ime.toUpperCase()}">${s.broj}. ${s.ime.toUpperCase()}</span> 
                                     <span style="color:#3498db; font-size:16px;">${s.procenat}%</span>
                                 </div>
                                 <div class="progress-bg"><div class="progress-fill bg-blue" style="--target-width: ${s.procenat}%"></div></div>
-                                <div class="stat-time">Broj osvojenih glasova: <b style="color:white; font-size:13px;">${s.glasovi}</b></div>
+                                <div class="stat-time">OSVOJENIH GLASOVA: <b style="color:white; font-size:13px;">${s.glasovi}</b></div>
                             </div>`;
                         redniBroj++;
                     });
