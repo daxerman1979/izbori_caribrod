@@ -17,72 +17,105 @@
             height: 100%;
             width: 100%;
             font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
         }
 
+        /* Minimalno zaglavlje preko mape */
         header {
-            background-color: #2c3e50;
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(44, 62, 80, 0.9);
             color: white;
-            padding: 15px 20px;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             z-index: 1000;
+            backdrop-filter: blur(5px);
         }
 
         header h1 {
             margin: 0;
-            font-size: 20px;
+            font-size: 18px;
+            text-align: center;
         }
 
-        .main-container {
-            display: flex;
-            flex: 1;
-            height: calc(100vh - 55px);
-        }
-
-        #sidebar {
-            width: 320px;
-            background-color: #f8f9fa;
-            border-right: 1px solid #ddd;
-            padding: 15px;
-            overflow-y: auto;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-        }
-
-        #sidebar h3 {
-            margin-top: 0;
-            color: #2c3e50;
-            font-size: 16px;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 8px;
-        }
-
-        .mesto-kartica {
-            background: white;
-            padding: 10px 12px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
-            border-left: 4px solid #3498db;
-        }
-
-        .mesto-kartica:hover {
-            background: #ebf5fb;
-            transform: translateX(3px);
-        }
-
-        .mesto-kartica b {
-            color: #2c3e50;
-        }
-
+        /* Mapa zauzima ceo ekran */
         #map {
-            flex: 1;
-            height: 100%;
+            width: 100%;
+            height: 100vh;
         }
 
+        /* Atraktivan GUI element (kartica) direktno na mapi */
+        .map-card-marker {
+            background: white;
+            border-radius: 8px;
+            padding: 8px 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid #e74c3c;
+            font-family: Arial, sans-serif;
+            white-space: nowrap;
+            transform: translate(-50%, -100%);
+            position: relative;
+        }
+
+        .map-card-marker::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px 6px 0;
+            border-style: solid;
+            border-color: white transparent;
+            display: block;
+            width: 0;
+        }
+
+        .badge-number {
+            background: #e74c3c;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+
+        .badge-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .badge-title {
+            font-weight: bold;
+            font-size: 13px;
+            color: #2c3e50;
+        }
+
+        .btn-delete-badge {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 5px;
+            transition: background 0.2s;
+        }
+
+        .btn-delete-badge:hover {
+            background: #c0392b;
+        }
+
+        /* Forma za unos pri kliku na mapu */
         .popup-form {
             display: flex;
             flex-direction: column;
@@ -109,43 +142,15 @@
         .popup-form button:hover {
             background-color: #219653;
         }
-
-        .btn-obrisi {
-            background-color: #e74c3c !important;
-            margin-top: 5px;
-        }
-        .btn-obrisi:hover {
-            background-color: #c0392b !important;
-        }
-
-        /* Stil za trajni naziv (tooltip) na mapi da uvek stoji vidljiv */
-        .trajni-naziv {
-            font-weight: bold;
-            font-size: 13px;
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid #2c3e50;
-            padding: 2px 6px;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Dimitrovgrad - Evidencija Biračkih Mesta</h1>
+        <h1>Dimitrovgrad - Biračka Mesta</h1>
     </header>
 
-    <div class="main-container">
-        <!-- Leva strana: Lista unetih mesta -->
-        <div id="sidebar">
-            <h3>Lista biračkih mesta</h3>
-            <div id="lista-mesta">Učitavanje...</div>
-        </div>
-
-        <!-- Desna strana: Mapa -->
-        <div id="map"></div>
-    </div>
+    <div id="map"></div>
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
@@ -166,7 +171,10 @@
         const mestaRef = ref(db, 'biracka_mesta');
 
         // Inicijalizacija mape centrirane na Dimitrovgrad
-        var map = L.map('map').setView([43.0186, 22.7447], 14);
+        var map = L.map('map', { zoomControl: false }).setView([43.0186, 22.7447], 14);
+
+        // Dodavanje dugmadi za zumiranje u ugao da ne smetaju
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
 
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
@@ -175,57 +183,44 @@
 
         var aktivniMarkeri = {};
 
-        // Slušanje promena u bazi u realnom vremenu
+        // Praćenje baza podataka u realnom vremenu
         onValue(mestaRef, (snapshot) => {
-            // Uklanjanje starijih markera sa mape pre ponovnog iscrtavanja
+            // Uklanjanje starih elemenata sa mape
             for (let id in aktivniMarkeri) {
                 map.removeLayer(aktivniMarkeri[id]);
             }
             aktivniMarkeri = {};
 
             const data = snapshot.val();
-            const listaDiv = document.getElementById('lista-mesta');
-            listaDiv.innerHTML = '';
-
-            if (!data) {
-                listaDiv.innerHTML = '<p style="color: #777; font-size: 14px;">Nema unetih biračkih mesta. Kliknite bilo gde na mapu da dodate novo mesto.</p>';
-                return;
-            }
+            if (!data) return;
 
             Object.keys(data).forEach((id) => {
                 let mesto = data[id];
 
-                // 1. Dodavanje markera sa TRAJNIM nazivom (tooltip) iznad njega
-                var marker = L.marker([mesto.lat, mesto.lng]).addTo(map);
-                
-                // Prikazuje naziv i broj direktno na mapi sve vreme
-                marker.bindTooltip(`Br. ${mesto.broj}: ${mesto.naziv}`, {
-                    permanent: true,
-                    direction: 'top',
-                    className: 'trajni-naziv'
+                // Kreiranje modernog vizuelnog GUI elementa direktno na mapi
+                var customHtml = `
+                    <div class="map-card-marker">
+                        <span class="badge-number">#${mesto.broj}</span>
+                        <div class="badge-info">
+                            <span class="badge-title">${mesto.naziv}</span>
+                        </div>
+                        <button class="btn-delete-badge" onclick="obrisiMesto('${id}', event)" title="Obriši">×</button>
+                    </div>
+                `;
+
+                var customIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: customHtml,
+                    iconSize: [0, 0], // Pozicionira se preko CSS transform-a
+                    iconAnchor: [0, 0]
                 });
 
+                var marker = L.marker([mesto.lat, mesto.lng], { icon: customIcon }).addTo(map);
                 aktivniMarkeri[id] = marker;
-
-                // 2. Dodavanje kartice u levi GUI meni
-                var kartica = document.createElement('div');
-                kartica.className = 'mesto-kartica';
-                kartica.innerHTML = `
-                    <div><b>Br. ${mesto.broj}</b>: ${mesto.naziv}</div>
-                    <button class="popup-form button btn-obrisi" style="width:100%; padding:3px; font-size:12px; margin-top:5px;" onclick="obrisiMesto('${id}', event)">Obriši</button>
-                `;
-                
-                // Klik na karticu u meniju zumira mapu na to mesto
-                kartica.onclick = function(e) {
-                    if(e.target.tagName === 'BUTTON') return;
-                    map.setView([mesto.lat, mesto.lng], 16);
-                };
-
-                listaDiv.appendChild(kartica);
             });
         });
 
-        // Klik na mapu otvara formu za unos novog biračkog mesta
+        // Klik na mapu otvara formu za dodavanje novog mesta
         map.on('click', function(e) {
             var lat = e.latlng.lat;
             var lng = e.latlng.lng;
@@ -233,9 +228,9 @@
             var formHtml = `
                 <div class="popup-form">
                     <strong>Novo biračko mesto</strong>
-                    <input type="text" id="input-broj" placeholder="Broj mesta (npr. 12)">
-                    <input type="text" id="input-naziv" placeholder="Naziv (npr. Dom kulture)">
-                    <button id="save-btn">Sačuvaj</button>
+                    <input type="text" id="input-broj" placeholder="Broj (npr. 12)">
+                    <input type="text" id="input-naziv" placeholder="Naziv (Dom kulture)">
+                    <button id="save-btn">Sačuvaj na mapu</button>
                 </div>
             `;
 
@@ -272,7 +267,7 @@
             }, 100);
         });
 
-        // Funkcija za brisanje pojedinačnog mesta
+        // Funkcija za brisanje direktno sa markera na mapi
         window.obrisiMesto = function(id, event) {
             event.stopPropagation();
             if (confirm("Da li ste sigurni da želite da obrišete ovo biračko mesto?")) {
