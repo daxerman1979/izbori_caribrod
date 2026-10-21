@@ -11,79 +11,53 @@
           crossorigin=""/>
 
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden;
-        }
-
+        html, body { margin: 0; padding: 0; height: 100%; width: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow: hidden; }
         #map { width: 100%; height: 100vh; background: #e5e5e5; }
-
         .custom-transparent-icon { background: transparent !important; border: none !important; }
 
-        .map-pin-container {
-            position: absolute; bottom: 0; left: 0;
-            transform: translate(-50%, -100%);
-            display: flex; flex-direction: column; align-items: center;
-            filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.25));
-            z-index: 1000; cursor: pointer;
-        }
-
+        .map-pin-container { position: absolute; bottom: 0; left: 0; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.25)); z-index: 1000; cursor: pointer; }
         .map-pin-container:hover .map-board { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
 
-        .map-board {
-            background: #ffffff; border-radius: 6px; padding: 8px 16px;
-            display: flex; flex-direction: column; align-items: center; gap: 6px;
-            min-width: 80px; max-width: 220px; transition: all 0.2s ease;
-        }
-
-        .board-title { font-size: 14px; font-weight: 700; color: #1e293b; text-align: center; line-height: 1.2; }
+        .map-board { background: #ffffff; border-radius: 8px; padding: 8px 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 90px; max-width: 220px; transition: all 0.2s ease; position: relative; }
+        
+        /* Živi bedž za izlaznost iznad table */
+        .live-turnout { background: #f39c12; color: white; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 10px; margin-bottom: 2px; box-shadow: 0 2px 5px rgba(243, 156, 18, 0.4); display: flex; align-items: center; gap: 4px; }
+        
+        .board-title { font-size: 13px; font-weight: 800; color: #1e293b; text-align: center; line-height: 1.2; }
         .board-number { font-size: 11px; color: #ef4444; font-weight: 700; background: #fee2e2; padding: 2px 10px; border-radius: 12px; }
         .map-triangle { width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #ffffff; margin-top: -1px; }
 
         .leaflet-popup-tip-container { display: none !important; }
         .leaflet-popup { margin-bottom: 25px !important; }
-        .leaflet-popup-content-wrapper {
-            background: rgba(20, 20, 20, 0.85) !important; backdrop-filter: blur(12px); color: white !important;
-            border-radius: 14px !important; box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1); padding: 5px !important;
-        }
+        .leaflet-popup-content-wrapper { background: rgba(20, 20, 20, 0.85) !important; backdrop-filter: blur(12px); color: white !important; border-radius: 14px !important; box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important; border: 1px solid rgba(255, 255, 255, 0.1); padding: 5px !important; }
         .leaflet-popup-close-button { color: #ffffff !important; font-size: 18px !important; top: 6px !important; right: 10px !important; font-weight: bold !important; transition: color 0.2s; }
         .leaflet-popup-close-button:hover { color: #ff4757 !important; }
 
-        .profi-form { display: flex; flex-direction: column; gap: 12px; width: 230px; padding: 8px; }
-        .profi-form h4 { margin: 0 0 5px 0; font-size: 14px; font-weight: 600; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; text-align: center; }
+        .profi-form { display: flex; flex-direction: column; gap: 10px; width: 250px; padding: 8px; }
+        .profi-form h4 { margin: 0 0 5px 0; font-size: 15px; font-weight: 600; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; text-align: center; }
 
         .board-section { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .board-section-title { font-size: 11px; text-transform: uppercase; color: #3498db; font-weight: 700; letter-spacing: 0.5px; margin: 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
-
         .profi-input { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px 10px; color: white; font-size: 13px; outline: none; width: 100%; box-sizing: border-box; }
         .profi-input:focus { border-color: #3498db; background: rgba(255, 255, 255, 0.12); }
-        .profi-form label { font-size: 11px; color: #a0aec0; margin-bottom: -6px; font-weight: 600; }
+        .profi-form label { font-size: 11px; color: #a0aec0; margin-bottom: -6px; font-weight: 600; line-height: 1.2; }
+
+        /* Lista rezultata u popupu */
+        .rezultati-lista { max-height: 220px; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 8px; }
+        .rezultati-lista::-webkit-scrollbar { width: 4px; }
+        .rezultati-lista::-webkit-scrollbar-thumb { background: #3498db; border-radius: 4px; }
+        .rezultat-red { display: flex; flex-direction: column; gap: 4px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); }
+        .rezultat-red label { white-space: normal; word-wrap: break-word; color: #ecf0f1; font-size: 11px; margin-bottom: 2px; }
 
         .profi-submit-btn { background: linear-gradient(135deg, #2ed573, #26af5f); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
-        .profi-submit-btn:hover { opacity: 0.9; }
-
         .btn-nazad { background: #7f8c8d; }
         .btn-izlaznost { background: linear-gradient(135deg, #f39c12, #d35400); }
         .btn-rezultati { background: linear-gradient(135deg, #3498db, #2980b9); }
-        .btn-row { display: flex; gap: 8px; }
-        .btn-row > button { flex: 1; }
+        .btn-row { display: flex; gap: 8px; } .btn-row > button { flex: 1; }
 
         #admin-badge { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: white; padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 1000; display: none; }
 
         /* Donji panel za Statistiku */
-        #stat-panel {
-            position: fixed; bottom: -60vh; left: 0; width: 100%; height: 50vh;
-            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px);
-            border-top-left-radius: 20px; border-top-right-radius: 20px;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.5); z-index: 2000;
-            transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; flex-direction: column; color: white;
-        }
+        #stat-panel { position: fixed; bottom: -65vh; left: 0; width: 100%; height: 55vh; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); z-index: 2000; transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; color: white; }
         #stat-panel.otvoren { bottom: 0; }
         .stat-header { display: flex; padding: 15px 20px; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); border-top-left-radius: 20px; border-top-right-radius: 20px; align-items: center; justify-content: space-between; }
         .stat-tabs { display: flex; gap: 10px; }
@@ -92,14 +66,18 @@
         .close-stat { background: transparent; border: none; color: white; font-size: 24px; cursor: pointer; line-height: 1; }
         .stat-content { padding: 20px; overflow-y: auto; flex: 1; }
 
-        /* Stilovi za progres bar izlaznosti */
+        /* Grafika za tabele statistike */
         .stat-row { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 15px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); }
-        .stat-row-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; font-size: 14px;}
-        .progress-bg { width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #e67e22); width: 0%; transition: width 1s ease-in-out; }
-        .stat-time { font-size: 11px; color: #a0aec0; margin-top: 5px; }
+        .stat-row-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; font-size: 13px; line-height: 1.3;}
+        .progress-bg { width: 100%; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; margin-top: 5px; }
+        .progress-fill { height: 100%; width: 0%; transition: width 1s ease-in-out; border-radius: 6px; }
+        
+        /* Boje za grafike */
+        .bg-orange { background: linear-gradient(90deg, #f39c12, #e67e22); }
+        .bg-blue { background: linear-gradient(90deg, #3498db, #2980b9); }
+        
+        .stat-time { font-size: 11px; color: #a0aec0; margin-top: 6px; }
 
-        /* Plutajuće dugme za otvaranje panela */
         #btn-otvori-stat { position: absolute; bottom: 20px; right: 20px; background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 30px; font-weight: bold; z-index: 1000; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
@@ -107,20 +85,18 @@
 
     <div id="admin-badge">ADMIN REŽIM AKTIVAN</div>
     <div id="map"></div>
-    <button id="btn-otvori-stat" onclick="toggleStatPanel(true)">📊 Statistika</button>
+    <button id="btn-otvori-stat" onclick="toggleStatPanel(true)">📊 Uživo Rezultati</button>
 
-    <!-- Donji Panel za statistiku -->
+    <!-- Donji Panel -->
     <div id="stat-panel">
         <div class="stat-header">
             <div class="stat-tabs">
                 <button class="stat-tab active-tab" onclick="prikaziStatTab('izlaznost')" id="tab-izlaznost">Izlaznost</button>
-                <button class="stat-tab" onclick="prikaziStatTab('rezultati')" id="tab-rezultati">Rezultati</button>
+                <button class="stat-tab" onclick="prikaziStatTab('rezultati')" id="tab-rezultati">Rezultati Stranke</button>
             </div>
             <button class="close-stat" onclick="toggleStatPanel(false)">&times;</button>
         </div>
-        <div class="stat-content" id="stat-content-area">
-            <!-- Podaci se pune iz JavaScripta -->
-        </div>
+        <div class="stat-content" id="stat-content-area"></div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -142,19 +118,32 @@
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
         var aktivniMarkeri = {};
-        var globalnaMestaData = {}; // Čuvamo podatke za panel
+        var globalnaMestaData = {}; 
 
-        // Generatori za padajuće liste vremena
-        window.getSatiOptions = function() {
-            let opts = '';
-            for(let i=0; i<24; i++) { let v = i.toString().padStart(2,'0'); opts += `<option value="${v}">${v}</option>`; }
-            return opts;
-        }
-        window.getMinutiOptions = function() {
-            let opts = '';
-            for(let i=0; i<60; i+=5) { let v = i.toString().padStart(2,'0'); opts += `<option value="${v}">${v}</option>`; }
-            return opts;
-        }
+        // Definisanje liste političkih partija
+        const politickeListe = [
+            "Aleksandar Vučić - Ujedinjena Srbija",
+            "Ivica Dačić - Faktor stabilnosti",
+            "Studentska lista - Studenti pobeđuju",
+            "Radim Ljajić - Ljudski",
+            "Savez vojvođanskih Mađara - Dr Balint Pastor",
+            "Usame Zukorlić - Pokret za ujedinjenje",
+            "Ruska stranka - Srbija u Briksu - Slobodan Nikolić",
+            "Autentična desnica - Dr Miloš Jovanović",
+            "Evropska Srbija - Marinika Tepić - Zdravko Ponoš",
+            "SDA Sanžaka - Čuvari Sandžaka",
+            "Bogoljub Karić - Pokret snaga Srbije",
+            "Liberalno zelena stranka - Za slobodnu i čistiju Srbiju",
+            "Biram pravu - Biram budućnost - Koalicija snaga - prof. dr Ferid Bulić...",
+            "Stranka rusko-srpskog jedinstva - Rusi i Srbi braća zauvek",
+            "Ćale ovo je za tebe - Petar Đurić",
+            "Vladimir Gajić - Alternativa za Srbiju",
+            "Albanska koalicija",
+            "Majka Srbija - Gruda"
+        ];
+
+        window.getSatiOptions = function() { let opts = ''; for(let i=0; i<24; i++) { let v = i.toString().padStart(2,'0'); opts += `<option value="${v}">${v}</option>`; } return opts; }
+        window.getMinutiOptions = function() { let opts = ''; for(let i=0; i<60; i+=5) { let v = i.toString().padStart(2,'0'); opts += `<option value="${v}">${v}</option>`; } return opts; }
 
         onValue(mestaRef, (snapshot) => {
             for (let id in aktivniMarkeri) map.removeLayer(aktivniMarkeri[id]);
@@ -162,14 +151,23 @@
             const data = snapshot.val();
             if (!data) return;
 
-            globalnaMestaData = data; // Ažuriramo lokalnu kopiju podataka
-            azurirajStatistiku(); // Osveži donji panel
+            globalnaMestaData = data; 
+            azurirajStatistiku(); 
 
             Object.keys(data).forEach((id) => {
                 let mesto = data[id];
+                
+                // Prikaz žive izlaznosti na samoj mapi
+                let izlaznostHtml = '';
+                if(mesto.ukupan_broj && mesto.izaslo) {
+                    let procenat = ((mesto.izaslo / mesto.ukupan_broj) * 100).toFixed(1);
+                    izlaznostHtml = `<div class="live-turnout">⏱️ ${procenat}%</div>`;
+                }
+
                 var pinHtml = `
                     <div class="map-pin-container">
                         <div class="map-board">
+                            ${izlaznostHtml}
                             <span class="board-title">${mesto.naziv}</span>
                             <span class="board-number">Broj: ${mesto.broj}</span>
                         </div>
@@ -205,9 +203,9 @@
                 <div class="profi-form">
                     <h4>Kontrolna Tabla</h4>
                     <div class="board-section">
-                        <label>Broj glasača po biračkom spisku</label>
-                        <input type="number" id="ukupan-broj-${id}" class="profi-input" placeholder="Unesite ukupan broj..." value="${ukBrojStr}">
-                        <button class="profi-submit-btn" style="padding: 6px; margin-top: 2px;" onclick="sacuvajUkupanBroj('${id}')">Sačuvaj broj</button>
+                        <label>Broj glasača po spisku</label>
+                        <input type="number" id="ukupan-broj-${id}" class="profi-input" placeholder="Ukupan broj..." value="${ukBrojStr}">
+                        <button class="profi-submit-btn" style="padding: 6px; margin-top: 2px;" onclick="sacuvajUkupanBroj('${id}')">Sačuvaj</button>
                     </div>
                     <div class="btn-row" style="margin-top: 5px;">
                         <button class="profi-submit-btn btn-izlaznost" onclick="prikaziIzlaznost('${id}')">Izlaznost</button>
@@ -221,8 +219,7 @@
             let broj = document.getElementById(`ukupan-broj-${id}`).value;
             if(!broj) return alert("Unesite broj glasača!");
             update(ref(db, 'biracka_mesta/' + id), { ukupan_broj: parseInt(broj) })
-                .then(() => alert("Broj uspešno sačuvan!"))
-                .catch(err => alert("Greška: " + err));
+                .then(() => alert("Broj uspešno sačuvan!"));
         };
 
         window.prikaziIzlaznost = function(id) {
@@ -234,7 +231,6 @@
                     <div class="board-section">
                         <label>Izašlo birača:</label>
                         <input type="number" id="izaslo-${id}" class="profi-input" placeholder="Npr. 120" value="${izStr}">
-                        
                         <label style="margin-top:5px;">Do (vreme):</label>
                         <div class="btn-row">
                             <select id="vreme-sat-${id}" class="profi-input">${getSatiOptions()}</select>
@@ -256,29 +252,59 @@
             let minut = document.getElementById(`vreme-minut-${id}`).value;
             if(!izaslo) return alert("Unesite broj izašlih birača!");
 
-            let vremeSastavljeno = `${sat}:${minut}`;
-            update(ref(db, 'biracka_mesta/' + id), { izaslo: parseInt(izaslo), vreme_update: vremeSastavljeno })
+            update(ref(db, 'biracka_mesta/' + id), { izaslo: parseInt(izaslo), vreme_update: `${sat}:${minut}` })
                 .then(() => {
-                    alert("Izlaznost uspešno sačuvana!");
                     prikaziGlavniMeni(id);
-                    toggleStatPanel(true); // Automatski otvara panel za statistiku odozdo!
-                })
-                .catch(err => alert("Greška: " + err));
+                    toggleStatPanel(true); 
+                });
         };
 
         window.prikaziRezultate = function(id) {
-            let sadrzaj = `
-                <div class="profi-form">
-                    <h4>Unos Rezultata</h4>
-                    <div class="board-section" style="text-align: center; color: #a0aec0; font-size: 13px; padding: 20px 10px;">
-                        Ovu tablu ćemo kasnije detaljno obraditi.
+            let mesto = globalnaMestaData[id];
+            let postojeciRezultati = mesto.rezultati || {};
+
+            let inputsHtml = politickeListe.map((imeListe, index) => {
+                let brojGlasova = postojeciRezultati[index] !== undefined ? postojeciRezultati[index] : '';
+                return `
+                    <div class="rezultat-red">
+                        <label>${index + 1}. ${imeListe}</label>
+                        <input type="number" id="rez-${id}-${index}" class="profi-input" value="${brojGlasova}" placeholder="Broj glasova">
                     </div>
-                    <button class="profi-submit-btn btn-nazad" style="width: 100%; margin-top: 5px;" onclick="prikaziGlavniMeni('${id}')">Nazad u glavni</button>
+                `;
+            }).join('');
+
+            let sadrzaj = `
+                <div class="profi-form" style="width: 280px;">
+                    <h4>Unos Rezultata Stranka</h4>
+                    <div class="rezultati-lista">
+                        ${inputsHtml}
+                    </div>
+                    <div class="btn-row" style="margin-top: 8px;">
+                        <button class="profi-submit-btn btn-nazad" onclick="prikaziGlavniMeni('${id}')">Nazad</button>
+                        <button class="profi-submit-btn" onclick="sacuvajRezultate('${id}')">Sačuvaj</button>
+                    </div>
                 </div>`;
             document.getElementById(`popup-content-${id}`).innerHTML = sadrzaj;
         };
 
-        // ADMIN DEO
+        window.sacuvajRezultate = function(id) {
+            let rezultatiZaBazu = {};
+            politickeListe.forEach((_, index) => {
+                let val = document.getElementById(`rez-${id}-${index}`).value;
+                if (val !== '') {
+                    rezultatiZaBazu[index] = parseInt(val);
+                }
+            });
+
+            update(ref(db, 'biracka_mesta/' + id), { rezultati: rezultatiZaBazu })
+                .then(() => {
+                    prikaziGlavniMeni(id);
+                    prikaziStatTab('rezultati');
+                    toggleStatPanel(true);
+                });
+        };
+
+        // KREIRANJE (ADMIN)
         if (isAdmin) {
             map.on('click', function(e) {
                 var lat = e.latlng.lat; var lng = e.latlng.lng;
@@ -287,7 +313,7 @@
                         <h4>Novo Biračko Mesto</h4>
                         <input type="text" id="input-naziv" class="profi-input" placeholder="Naziv (npr. Dom kulture)">
                         <input type="text" id="input-broj" class="profi-input" placeholder="Broj (npr. 05)">
-                        <button id="save-btn" class="profi-submit-btn">Postavi tablu na mapu</button>
+                        <button id="save-btn" class="profi-submit-btn">Postavi tablu</button>
                     </div>`;
                 L.popup({ closeOnClick: false, autoClose: false }).setLatLng([lat, lng]).setContent(formHtml).openOn(map);
                 setTimeout(() => {
@@ -302,11 +328,10 @@
             });
         }
 
-        // LOGIKA ZA DONJI PANEL (STATISTIKA)
+        // STATISTIKA LOGIKA
         window.toggleStatPanel = function(otvori) {
             let p = document.getElementById('stat-panel');
-            if(otvori) p.classList.add('otvoren');
-            else p.classList.remove('otvoren');
+            if(otvori) p.classList.add('otvoren'); else p.classList.remove('otvoren');
             if(otvori) azurirajStatistiku();
         }
 
@@ -324,48 +349,73 @@
             if(!globalnaMestaData) { container.innerHTML = "<p>Nema podataka</p>"; return; }
 
             if(trenutniTab === 'izlaznost') {
-                let html = '';
-                let ukupnoGlasacaSvi = 0;
-                let ukupnoIzasloSvi = 0;
-
+                let html = ''; let ukupnoGlasacaSvi = 0; let ukupnoIzasloSvi = 0;
                 Object.keys(globalnaMestaData).forEach(id => {
-                    let m = globalnaMestaData[id];
-                    let upisano = m.ukupan_broj || 0;
-                    let izaslo = m.izaslo || 0;
-                    let procenat = 0;
-                    
-                    if(upisano > 0) {
-                        procenat = ((izaslo / upisano) * 100).toFixed(1);
-                        ukupnoGlasacaSvi += upisano;
-                        ukupnoIzasloSvi += izaslo;
-                    }
-
+                    let m = globalnaMestaData[id]; let upisano = m.ukupan_broj || 0; let izaslo = m.izaslo || 0; let procenat = 0;
+                    if(upisano > 0) { procenat = ((izaslo / upisano) * 100).toFixed(1); ukupnoGlasacaSvi += upisano; ukupnoIzasloSvi += izaslo; }
                     html += `
                         <div class="stat-row">
-                            <div class="stat-row-header">
-                                <span>Br. ${m.broj} - ${m.naziv}</span>
-                                <span style="color:#f39c12;">${procenat}%</span>
-                            </div>
-                            <div class="progress-bg">
-                                <div class="progress-fill" style="width: ${procenat}%"></div>
-                            </div>
-                            <div class="stat-time">Poslednji update: ${m.vreme_update ? m.vreme_update + 'h' : 'Nema unosa'} | Izašlo: ${izaslo} / ${upisano}</div>
-                        </div>
-                    `;
+                            <div class="stat-row-header"><span>Br. ${m.broj} - ${m.naziv}</span> <span style="color:#f39c12;">${procenat}%</span></div>
+                            <div class="progress-bg"><div class="progress-fill bg-orange" style="width: ${procenat}%"></div></div>
+                            <div class="stat-time">Osveženo: ${m.vreme_update ? m.vreme_update + 'h' : 'Nema unosa'} | Izašlo: ${izaslo}/${upisano}</div>
+                        </div>`;
+                });
+                let totalProcenat = ukupnoGlasacaSvi > 0 ? ((ukupnoIzasloSvi / ukupnoGlasacaSvi) * 100).toFixed(1) : 0;
+                container.innerHTML = `
+                    <div style="text-align:center; margin-bottom: 20px;">
+                        <h2 style="margin:0; font-size:36px; color:#f39c12;">${totalProcenat}%</h2>
+                        <p style="margin:0; color:#a0aec0; font-size:12px; text-transform:uppercase;">Ukupna izlaznost na nivou opštine</p>
+                    </div> ${html}`;
+            } else {
+                // LOGIKA ZA REZULTATE - Sabiranje svih glasova
+                let zbirGlasova = new Array(politickeListe.length).fill(0);
+                let ukupanBrojVazecih = 0;
+
+                Object.keys(globalnaMestaData).forEach(id => {
+                    let rezultatiMesta = globalnaMestaData[id].rezultati;
+                    if (rezultatiMesta) {
+                        Object.keys(rezultatiMesta).forEach(listaIndex => {
+                            let glasovi = parseInt(rezultatiMesta[listaIndex]) || 0;
+                            zbirGlasova[listaIndex] += glasovi;
+                            ukupanBrojVazecih += glasovi;
+                        });
+                    }
                 });
 
-                // Dodavanje zbirne statistike na vrh
-                let totalProcenat = ukupnoGlasacaSvi > 0 ? ((ukupnoIzasloSvi / ukupnoGlasacaSvi) * 100).toFixed(1) : 0;
-                let topHtml = `
-                    <div style="text-align:center; margin-bottom: 20px;">
-                        <h2 style="margin:0; font-size:32px; color:#f39c12;">${totalProcenat}%</h2>
-                        <p style="margin:0; color:#a0aec0; font-size:12px; text-transform:uppercase;">Ukupna prosečna izlaznost (${ukupnoIzasloSvi}/${ukupnoGlasacaSvi})</p>
-                    </div>
-                `;
+                if (ukupanBrojVazecih === 0) {
+                    container.innerHTML = `<div style="text-align:center; padding: 40px; color: #a0aec0;">Trenutno nema unetih rezultata glasanja.</div>`;
+                    return;
+                }
 
-                container.innerHTML = topHtml + html;
-            } else {
-                container.innerHTML = `<div style="text-align:center; padding: 40px; color: #a0aec0;">Ovde će biti prikazani rezultati po strankama u narednoj fazi.</div>`;
+                // Kreiranje niza objekata za sortiranje
+                let strankeZaPrikaz = politickeListe.map((ime, index) => {
+                    let glasovi = zbirGlasova[index];
+                    let procenat = ukupanBrojVazecih > 0 ? ((glasovi / ukupanBrojVazecih) * 100).toFixed(2) : 0;
+                    return { ime: ime, broj: index + 1, glasovi: glasovi, procenat: parseFloat(procenat) };
+                });
+
+                // Sortiranje od najvećeg ka najmanjem
+                strankeZaPrikaz.sort((a, b) => b.glasovi - a.glasovi);
+
+                let html = `
+                    <div style="text-align:center; margin-bottom: 20px;">
+                        <h3 style="margin:0; color:#3498db; font-size: 20px;">Ukupno obrađeno glasova: ${ukupanBrojVazecih}</h3>
+                    </div>`;
+
+                strankeZaPrikaz.forEach(stranka => {
+                    if (stranka.glasovi > 0) {
+                        html += `
+                            <div class="stat-row">
+                                <div class="stat-row-header">
+                                    <span style="flex:1; padding-right:10px;">${stranka.broj}. ${stranka.ime}</span> 
+                                    <span style="color:#3498db; font-size:16px;">${stranka.procenat}%</span>
+                                </div>
+                                <div class="progress-bg"><div class="progress-fill bg-blue" style="width: ${stranka.procenat}%"></div></div>
+                                <div class="stat-time">Broj osvojenih glasova: <b style="color:white">${stranka.glasovi}</b></div>
+                            </div>`;
+                    }
+                });
+                container.innerHTML = html;
             }
         }
     </script>
