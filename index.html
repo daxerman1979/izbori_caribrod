@@ -103,7 +103,16 @@
         .card-accent-blue::before { background: #3498db; }
         .text-blue { color: #3498db !important; font-size: 32px !important; }
 
-        .sub-tabs-container { display: flex; gap: 8px; overflow-x: auto; padding: 0 20px 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); scroll-behavior: smooth; }
+        /* NOVO: Poboljšan kontejner za tabove (Drag to scroll) */
+        .sub-tabs-container { 
+            display: flex; gap: 8px; overflow-x: auto; padding: 5px 20px 15px 20px; 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+            scroll-behavior: smooth; 
+            -webkit-overflow-scrolling: touch; /* Zbog glatkog telefonskog skrolanja */
+            cursor: grab; /* Pokazivač za miša */
+            user-select: none; /* Da ne selektuje tekst dok se vuče */
+        }
+        .sub-tabs-container:active { cursor: grabbing; } /* Kada se klikne i vuče */
         .sub-tabs-container::-webkit-scrollbar { height: 4px; }
         .sub-tabs-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
         .sub-tab { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #a0aec0; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; white-space: nowrap; transition: all 0.3s; text-transform: uppercase; }
@@ -286,7 +295,6 @@
                     let popupContent = `
                         <div class="profi-form" id="popup-content-${id}">
                             <h4>Zaštićen pristup</h4>
-                            <!-- oninput prebacuje vizuelno u velika slova -->
                             <input type="password" id="pin-input-${id}" class="profi-input" placeholder="UNESITE KOD..." maxlength="15" oninput="this.value = this.value.toUpperCase()">
                             <button class="profi-submit-btn" onclick="proveriPin('${id}')">OTKLJUČAJ TABLU</button>
                         </div>`;
@@ -298,7 +306,6 @@
         });
 
         window.proveriPin = function(id) {
-            // Sigurnost: Iza kulisa takođe obavezno prevodimo u velika slova pre provere
             let uneseniPin = document.getElementById(`pin-input-${id}`).value.trim().toUpperCase();
             let mesto = window.globalnaMestaData[id];
             let tacanPin = mesto.pin ? mesto.pin.toUpperCase() : '123456';
@@ -418,7 +425,6 @@
         }
 
         function prikaziAdminFormu(lat, lng, prefilledNaziv, prefilledBroj) {
-            // oninput polja za forsiranje velikih slova dok se kuca
             var formHtml = `
                 <div class="profi-form">
                     <h4>PODEŠAVANJE LOKACIJE</h4>
@@ -435,7 +441,6 @@
             setTimeout(() => {
                 var btn = document.getElementById('save-btn');
                 if(btn) btn.onclick = function() {
-                    // Iza kulisa uvek prebacujemo u velika slova za bazu
                     var n = document.getElementById('input-naziv').value.trim().toUpperCase();
                     var b = document.getElementById('input-broj').value.trim().toUpperCase();
                     var p = document.getElementById('input-pin').value.trim().toUpperCase();
@@ -469,6 +474,18 @@
 
         window.postaviPodTab = function(id) {
             trenutniPodTab = id;
+            
+            // Logika da se prilikom klika vizuelno pomeri na taj tab
+            let slider = document.querySelector('.sub-tabs-container');
+            if (slider) {
+                let aktivniTab = Array.from(slider.children).find(t => t.innerText.includes(id === 'sve' ? 'SVA BIRAČKA' : window.globalnaMestaData[id].broj));
+                if (aktivniTab) {
+                    slider.scrollTo({
+                        left: aktivniTab.offsetLeft - (slider.offsetWidth / 2) + (aktivniTab.offsetWidth / 2),
+                        behavior: 'smooth'
+                    });
+                }
+            }
             azurirajStatistiku();
         }
 
@@ -626,6 +643,38 @@
             }
             detailsHtml += `</div>`;
             area.innerHTML = topHtml + subTabsHtml + detailsHtml;
+
+            // NOVO: Ubacivanje logike za "Drag to scroll" horizontalnog menija
+            let slider = area.querySelector('.sub-tabs-container');
+            if (slider) {
+                let isDown = false;
+                let startX;
+                let scrollLeft;
+
+                // Mouse Eventi za prevlačenje na PC-u
+                slider.addEventListener('mousedown', (e) => {
+                    isDown = true;
+                    startX = e.pageX - slider.offsetLeft;
+                    scrollLeft = slider.scrollLeft;
+                });
+                slider.addEventListener('mouseleave', () => { isDown = false; });
+                slider.addEventListener('mouseup', () => { isDown = false; });
+                slider.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - slider.offsetLeft;
+                    const walk = (x - startX) * 1.5; // Brzina prevlačenja
+                    slider.scrollLeft = scrollLeft - walk;
+                });
+
+                // Skrolovanje korišćenjem točkića na mišu (Hover + Wheel)
+                slider.addEventListener('wheel', (e) => {
+                    if(e.deltaY !== 0) {
+                        e.preventDefault();
+                        slider.scrollLeft += e.deltaY;
+                    }
+                });
+            }
         }
     </script>
 </body>
