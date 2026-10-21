@@ -41,10 +41,9 @@
             align-items: center;
             filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.25));
             z-index: 1000;
-            cursor: pointer; /* Pokazuje da je tabla klikabilna */
+            cursor: pointer;
         }
 
-        /* Hover efekat kada se predje mišem preko table */
         .map-pin-container:hover .map-board {
             transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.4);
@@ -124,7 +123,6 @@
             padding-bottom: 6px;
         }
 
-        /* Dodatni stil za labele unutar panela za podatke */
         .profi-form label {
             font-size: 12px;
             color: #a0aec0;
@@ -152,7 +150,6 @@
             background: rgba(255, 255, 255, 0.12);
         }
 
-        /* Stil za veće tekstualno polje (Rezultati) */
         textarea.profi-input {
             resize: vertical;
             min-height: 60px;
@@ -179,10 +176,28 @@
         .profi-submit-btn:active {
             transform: scale(0.98);
         }
+
+        /* Oznaka da je admin ulogovan */
+        #admin-badge {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e74c3c;
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
+            display: none; /* Skriveno po defaultu */
+        }
     </style>
 </head>
 <body>
 
+    <div id="admin-badge">ADMIN REŽIM AKTIVAN</div>
     <div id="map"></div>
 
     <!-- Leaflet JS -->
@@ -203,8 +218,16 @@
         const db = getDatabase(app);
         const mestaRef = ref(db, 'biracka_mesta');
 
-        var map = L.map('map', { zoomControl: false }).setView([43.0186, 22.7447], 14);
+        // Provera da li je URL "tajni" (da li sadrži ?admin=da)
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAdmin = urlParams.get('admin') === 'da';
 
+        // Ako je admin, prikaži crvenu oznaku na vrhu ekrana
+        if (isAdmin) {
+            document.getElementById('admin-badge').style.display = 'block';
+        }
+
+        var map = L.map('map', { zoomControl: false }).setView([43.0186, 22.7447], 14);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -214,6 +237,7 @@
 
         var aktivniMarkeri = {};
 
+        // Slušanje iz Firebase baze - OVO SVI VIDE
         onValue(mestaRef, (snapshot) => {
             for (let id in aktivniMarkeri) {
                 map.removeLayer(aktivniMarkeri[id]);
@@ -245,11 +269,10 @@
 
                 var marker = L.marker([mesto.lat, mesto.lng], { icon: pinIcon }).addTo(map);
                 
-                // --- NOVO: Klik na postojeću tablu otvara zahtev za PIN ---
+                // Klik na postavljenu tablu (SVI mogu da kliknu i unesu PIN)
                 marker.on('click', function(e) {
-                    L.DomEvent.stopPropagation(e); // Sprečava da mapa registruje klik za novo mesto
+                    L.DomEvent.stopPropagation(e); 
 
-                    // Prvobitni sadržaj: Traženje koda
                     let popupContent = `
                         <div class="profi-form" id="popup-content-${id}">
                             <h4>Zaštićen pristup</h4>
@@ -268,21 +291,16 @@
             });
         });
 
-        // Globalna funkcija za proveru PIN-a
+        // Globalne funkcije za sve korisnike (unos PIN-a i podataka)
         window.proveriPin = function(id) {
             let uneseniPin = document.getElementById(`pin-input-${id}`).value;
-            
             if (uneseniPin === '123456') {
-                // Ako je PIN tačan, menjamo sadržaj u panel za unos podataka
                 let noviSadrzaj = `
                     <h4>Unos Podataka</h4>
-                    
                     <label>Izlaznost (%)</label>
                     <input type="text" id="izlaznost-${id}" class="profi-input" placeholder="Npr. 45.5%">
-                    
                     <label>Rezultati</label>
                     <textarea id="rezultati-${id}" class="profi-input" placeholder="Unesite raspored glasova..."></textarea>
-                    
                     <button class="profi-submit-btn" onclick="potvrdiPodatke('${id}')">Potvrdi</button>
                 `;
                 document.getElementById(`popup-content-${id}`).innerHTML = noviSadrzaj;
@@ -291,61 +309,61 @@
             }
         };
 
-        // Globalna funkcija za potvrdu (spremna za sledeći korak)
         window.potvrdiPodatke = function(id) {
             let izlaznost = document.getElementById(`izlaznost-${id}`).value;
             let rezultati = document.getElementById(`rezultati-${id}`).value;
-            
-            alert(`Spremno za snimanje!\nIzlaznost: ${izlaznost}\nRezultati: ${rezultati}\n\nOvo ćemo u sledećem koraku poslati u bazu!`);
+            alert(`Spremno za snimanje!\nIzlaznost: ${izlaznost}\nRezultati: ${rezultati}`);
             map.closePopup();
         };
 
-        // Klik na praznu mapu i dalje dodaje nova biračka mesta
-        map.on('click', function(e) {
-            var lat = e.latlng.lat;
-            var lng = e.latlng.lng;
+        // KREIRANJE NOVIH MESTA - DOZVOLJENO SAMO ADMINU
+        if (isAdmin) {
+            map.on('click', function(e) {
+                var lat = e.latlng.lat;
+                var lng = e.latlng.lng;
 
-            var formHtml = `
-                <div class="profi-form">
-                    <h4>Novo Biračko Mesto</h4>
-                    <input type="text" id="input-naziv" class="profi-input" placeholder="Naziv (npr. Dom kulture)">
-                    <input type="text" id="input-broj" class="profi-input" placeholder="Broj (npr. 05)">
-                    <button id="save-btn" class="profi-submit-btn">Postavi tablu na mapu</button>
-                </div>
-            `;
+                var formHtml = `
+                    <div class="profi-form">
+                        <h4>Novo Biračko Mesto</h4>
+                        <input type="text" id="input-naziv" class="profi-input" placeholder="Naziv (npr. Dom kulture)">
+                        <input type="text" id="input-broj" class="profi-input" placeholder="Broj (npr. 05)">
+                        <button id="save-btn" class="profi-submit-btn">Postavi tablu na mapu</button>
+                    </div>
+                `;
 
-            L.popup()
-                .setLatLng([lat, lng])
-                .setContent(formHtml)
-                .openOn(map);
+                L.popup()
+                    .setLatLng([lat, lng])
+                    .setContent(formHtml)
+                    .openOn(map);
 
-            setTimeout(() => {
-                var saveBtn = document.getElementById('save-btn');
-                if (saveBtn) {
-                    saveBtn.onclick = function() {
-                        var naziv = document.getElementById('input-naziv').value.trim();
-                        var broj = document.getElementById('input-broj').value.trim();
+                setTimeout(() => {
+                    var saveBtn = document.getElementById('save-btn');
+                    if (saveBtn) {
+                        saveBtn.onclick = function() {
+                            var naziv = document.getElementById('input-naziv').value.trim();
+                            var broj = document.getElementById('input-broj').value.trim();
 
-                        if (!naziv || !broj) {
-                            alert("Molimo popunite oba polja (naziv i broj)!");
-                            return;
-                        }
+                            if (!naziv || !broj) {
+                                alert("Molimo popunite oba polja (naziv i broj)!");
+                                return;
+                            }
 
-                        const novoMestoRef = push(mestaRef);
-                        set(novoMestoRef, {
-                            lat: lat,
-                            lng: lng,
-                            naziv: naziv,
-                            broj: broj
-                        }).then(() => {
-                            map.closePopup();
-                        }).catch((error) => {
-                            alert("Greška pri upisu u bazu: " + error.message);
-                        });
-                    };
-                }
-            }, 100);
-        });
+                            const novoMestoRef = push(mestaRef);
+                            set(novoMestoRef, {
+                                lat: lat,
+                                lng: lng,
+                                naziv: naziv,
+                                broj: broj
+                            }).then(() => {
+                                map.closePopup();
+                            }).catch((error) => {
+                                alert("Greška pri upisu u bazu: " + error.message);
+                            });
+                        };
+                    }
+                }, 100);
+            });
+        }
     </script>
 
 </body>
