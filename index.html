@@ -26,13 +26,11 @@
             background: #e5e5e5;
         }
 
-        /* Uklanjamo fabrička Leaflet ograničenja koja su pravila "oblak" */
         .custom-transparent-icon {
             background: transparent !important;
             border: none !important;
         }
 
-        /* Kontejner same table */
         .map-pin-container {
             position: absolute;
             bottom: 0;
@@ -41,12 +39,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* Drop-shadow stvara senku oko celog oblika (i table i trougla) */
             filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.25));
             z-index: 1000;
+            cursor: pointer; /* Pokazuje da je tabla klikabilna */
         }
 
-        /* Glavna tabla */
+        /* Hover efekat kada se predje mišem preko table */
+        .map-pin-container:hover .map-board {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
         .map-board {
             background: #ffffff;
             border-radius: 6px;
@@ -56,43 +59,40 @@
             align-items: center;
             gap: 6px;
             min-width: 80px;
-            max-width: 220px; /* Ako je ime predugačko, preći će u novi red umesto da ispadne */
+            max-width: 220px;
+            transition: all 0.2s ease;
         }
 
-        /* Naslov na tabli */
         .board-title {
             font-size: 14px;
             font-weight: 700;
             color: #1e293b;
             text-align: center;
-            white-space: normal; /* Dozvoljava tekstu da predje u drugi red ako treba */
+            white-space: normal;
             word-wrap: break-word;
             line-height: 1.2;
         }
 
-        /* Broj na tabli */
         .board-number {
             font-size: 11px;
-            color: #ef4444; /* Fina crvena boja */
+            color: #ef4444;
             font-weight: 700;
-            background: #fee2e2; /* Svetlo crvena pozadina bedža */
+            background: #fee2e2;
             padding: 2px 10px;
             border-radius: 12px;
             white-space: nowrap;
             letter-spacing: 0.5px;
         }
 
-        /* Trougao na dnu table koji pokazuje tačnu lokaciju */
         .map-triangle {
             width: 0;
             height: 0;
             border-left: 8px solid transparent;
             border-right: 8px solid transparent;
             border-top: 8px solid #ffffff;
-            margin-top: -1px; /* Spaja trougao savršeno sa tablom bez proreza */
+            margin-top: -1px;
         }
 
-        /* Staklasti prozor za unos (popup) */
         .leaflet-popup-content-wrapper {
             background: rgba(20, 20, 20, 0.85) !important;
             backdrop-filter: blur(12px);
@@ -124,6 +124,14 @@
             padding-bottom: 6px;
         }
 
+        /* Dodatni stil za labele unutar panela za podatke */
+        .profi-form label {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-bottom: -6px;
+            font-weight: 600;
+        }
+
         .profi-input {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -144,6 +152,12 @@
             background: rgba(255, 255, 255, 0.12);
         }
 
+        /* Stil za veće tekstualno polje (Rezultati) */
+        textarea.profi-input {
+            resize: vertical;
+            min-height: 60px;
+        }
+
         .profi-submit-btn {
             background: linear-gradient(135deg, #2ed573, #26af5f);
             color: white;
@@ -155,6 +169,7 @@
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3);
             transition: opacity 0.2s, transform 0.1s;
+            margin-top: 5px;
         }
 
         .profi-submit-btn:hover {
@@ -221,7 +236,6 @@
                     </div>
                 `;
 
-                // Dodata je klasa 'custom-transparent-icon' koja gasi fabričke kockice i senke Leaflet-a
                 var pinIcon = L.divIcon({
                     className: 'custom-transparent-icon',
                     html: pinHtml,
@@ -230,10 +244,63 @@
                 });
 
                 var marker = L.marker([mesto.lat, mesto.lng], { icon: pinIcon }).addTo(map);
+                
+                // --- NOVO: Klik na postojeću tablu otvara zahtev za PIN ---
+                marker.on('click', function(e) {
+                    L.DomEvent.stopPropagation(e); // Sprečava da mapa registruje klik za novo mesto
+
+                    // Prvobitni sadržaj: Traženje koda
+                    let popupContent = `
+                        <div class="profi-form" id="popup-content-${id}">
+                            <h4>Zaštićen pristup</h4>
+                            <input type="password" id="pin-input-${id}" class="profi-input" placeholder="Unesite kod..." maxlength="6">
+                            <button class="profi-submit-btn" onclick="proveriPin('${id}')">Otključaj</button>
+                        </div>
+                    `;
+
+                    L.popup()
+                        .setLatLng(marker.getLatLng())
+                        .setContent(popupContent)
+                        .openOn(map);
+                });
+
                 aktivniMarkeri[id] = marker;
             });
         });
 
+        // Globalna funkcija za proveru PIN-a
+        window.proveriPin = function(id) {
+            let uneseniPin = document.getElementById(`pin-input-${id}`).value;
+            
+            if (uneseniPin === '123456') {
+                // Ako je PIN tačan, menjamo sadržaj u panel za unos podataka
+                let noviSadrzaj = `
+                    <h4>Unos Podataka</h4>
+                    
+                    <label>Izlaznost (%)</label>
+                    <input type="text" id="izlaznost-${id}" class="profi-input" placeholder="Npr. 45.5%">
+                    
+                    <label>Rezultati</label>
+                    <textarea id="rezultati-${id}" class="profi-input" placeholder="Unesite raspored glasova..."></textarea>
+                    
+                    <button class="profi-submit-btn" onclick="potvrdiPodatke('${id}')">Potvrdi</button>
+                `;
+                document.getElementById(`popup-content-${id}`).innerHTML = noviSadrzaj;
+            } else {
+                alert("Netačan kod! Pokušajte ponovo.");
+            }
+        };
+
+        // Globalna funkcija za potvrdu (spremna za sledeći korak)
+        window.potvrdiPodatke = function(id) {
+            let izlaznost = document.getElementById(`izlaznost-${id}`).value;
+            let rezultati = document.getElementById(`rezultati-${id}`).value;
+            
+            alert(`Spremno za snimanje!\nIzlaznost: ${izlaznost}\nRezultati: ${rezultati}\n\nOvo ćemo u sledećem koraku poslati u bazu!`);
+            map.closePopup();
+        };
+
+        // Klik na praznu mapu i dalje dodaje nova biračka mesta
         map.on('click', function(e) {
             var lat = e.latlng.lat;
             var lng = e.latlng.lng;
@@ -243,7 +310,7 @@
                     <h4>Novo Biračko Mesto</h4>
                     <input type="text" id="input-naziv" class="profi-input" placeholder="Naziv (npr. Dom kulture)">
                     <input type="text" id="input-broj" class="profi-input" placeholder="Broj (npr. 05)">
-                    <button id="save-btn" class="profi-submit-btn">Sačuvaj na mapu</button>
+                    <button id="save-btn" class="profi-submit-btn">Postavi tablu na mapu</button>
                 </div>
             `;
 
