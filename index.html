@@ -3,39 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Centar - Caribrodski Izbori</title>
+    <title>Dimitrovgrad - Izborna Mapa Uživo</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
     
     <style>
-        :root {
-            --bg-dark: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-muted: #94a3b8;
-            --accent-blue: #3b82f6; --accent-orange: #f59e0b; --accent-green: #10b981; --border-color: #334155;
+        html, body { margin: 0; padding: 0; height: 100%; width: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow: hidden; background: #e5e5e5; }
+        
+        #map { width: 100%; height: 100vh; background: #e5e5e5; }
+        
+        .custom-transparent-icon { background: transparent !important; border: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
+        
+        /* -- STILOVI ZA DETALJNE TABLE NA MAPI (ZUMIRANO) -- */
+        .map-board { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); border-radius: 8px; padding: 8px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 100px; max-width: 220px; border: 1px solid rgba(52, 152, 219, 0.3); }
+        .live-turnout { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; font-size: 13px; font-weight: bold; padding: 4px 12px; border-radius: 12px; margin-bottom: 2px; box-shadow: 0 2px 8px rgba(243, 156, 18, 0.5); white-space: nowrap; }
+        .board-title { font-size: 11px; font-weight: 800; color: #1e293b; text-align: center; line-height: 1.2; text-transform: uppercase; }
+        .board-number { font-size: 10px; color: #ef4444; font-weight: 700; background: #fee2e2; padding: 2px 8px; border-radius: 12px; text-transform: uppercase; margin-top: 2px;}
+
+        @media (max-width: 600px) {
+            .map-board { padding: 6px 10px; max-width: 160px; }
+            .live-turnout { font-size: 11px; padding: 3px 8px; }
+            .board-title { font-size: 10px; }
         }
 
-        html, body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background: #e5e5e5; color: var(--text-main); height: 100vh; overflow: hidden; }
+        /* -- STILOVI ZA TAČKE (ODZUMIRANO) -- */
+        .single-dot { position: absolute; top: 0; left: 0; width: 14px; height: 14px; background: #e74c3c; border: 3px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px rgba(231, 76, 60, 0.8); cursor: pointer; transition: transform 0.2s; }
+        .single-dot:hover { transform: translate(-50%, -50%) scale(1.3); }
+        .cluster-dot { position: absolute; top: 0; left: 0; width: 28px; height: 28px; background: #e74c3c; border: 3px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 13px; box-shadow: 0 0 15px rgba(231, 76, 60, 0.9); cursor: pointer; animation: pulseCluster 2s infinite; }
+        @keyframes pulseCluster { 0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); } }
 
-        #map { width: 100%; height: 100vh; background: #e5e5e5; position: absolute; top: 0; left: 0; z-index: 1; }
+        /* -- TV KAJRON (DONJI PANEL) -- */
+        #kajron-container { position: fixed; bottom: -200px; left: 0; width: 100%; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border-top: 3px solid #e74c3c; z-index: 4000; transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
+        #kajron-container.visible { bottom: 0; }
+        .kajron-header { background: #e74c3c; color: white; font-size: 11px; font-weight: 900; padding: 4px 15px; letter-spacing: 2px; text-transform: uppercase; display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; border-bottom-right-radius: 10px; }
+        .live-dot-small { width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: pulseWhite 1.5s infinite; }
+        @keyframes pulseWhite { 0% { box-shadow: 0 0 0 0 rgba(255,255,255, 0.7); } 70% { box-shadow: 0 0 0 5px rgba(255,255,255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255, 0); } }
+        .kajron-track { width: 100%; overflow: hidden; padding: 15px 0; }
+        .ticker-content { display: flex; gap: 12px; width: max-content; animation: scrollTicker 45s linear infinite; padding-left: 12px; }
+        .ticker-content:hover, .ticker-content:active { animation-play-state: paused; }
+        @keyframes scrollTicker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .kajron-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px 15px; min-width: 220px; max-width: 220px; display: flex; flex-direction: column; gap: 6px; }
+        .kc-title { font-size: 12px; font-weight: 800; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
+        .kc-broj { color: #e74c3c; font-weight: 900; margin-right: 5px;}
+        .kc-data { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+        .kc-perc { font-size: 22px; font-weight: 900; color: #f39c12; line-height: 1; }
+        .kc-label { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
+        .kc-stats { display: flex; justify-content: space-between; font-size: 10px; color: #a0aec0; margin-top: 2px; }
+        .kc-stats strong { color: white; }
 
-        /* LOGIN SCREEN */
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
-        .login-box { background: var(--bg-card); padding: 40px; border-radius: 16px; border: 1px solid var(--border-color); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 300px; }
-        .login-box input { width: 100%; padding: 12px; margin: 20px 0; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: white; outline: none; box-sizing: border-box; font-size: 16px; text-align: center; }
-        .login-box button { width: 100%; padding: 12px; background: var(--accent-blue); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; text-transform: uppercase; }
-
-        /* ADMIN SIDEBAR ZA PREVLAČENJE */
-        #admin-sidebar { position: fixed; right: -320px; top: 0; width: 300px; height: 100vh; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: -5px 0 30px rgba(0,0,0,0.5); z-index: 3000; transition: right 0.4s; display: flex; flex-direction: column; }
+        /* -- ADMIN SIDEBAR (SAMO KADA JE ?admin=da) -- */
+        #admin-sidebar { position: fixed; right: -320px; top: 0; width: 300px; height: 100vh; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: -5px 0 30px rgba(0,0,0,0.5); z-index: 5000; transition: right 0.4s; display: flex; flex-direction: column; color: white; }
         #admin-sidebar.open { right: 0; }
         .admin-sidebar-header { padding: 20px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
         .admin-sidebar-header h3 { margin: 0; font-size: 16px; color: #3498db; text-transform: uppercase; }
         .admin-sidebar-header p { margin: 5px 0 0 0; font-size: 11px; color: #a0aec0; }
         .admin-sidebar-content { padding: 15px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 10px; }
-        .drag-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 12px; cursor: grab; display: flex; flex-direction: column; gap: 4px; transition: all 0.2s; }
+        .drag-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 12px; cursor: grab; display: flex; flex-direction: column; gap: 4px; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .drag-item:hover { background: rgba(52, 152, 219, 0.15); border-color: #3498db; transform: translateX(-3px); }
-        .drag-item-broj { font-size: 11px; color: #f39c12; font-weight: 800; }
-        .drag-item-naziv { font-size: 13px; font-weight: bold; color: white; text-transform: uppercase; }
+        .drag-item-broj { font-size: 11px; color: #f39c12; font-weight: 800; text-transform: uppercase; }
+        .drag-item-naziv { font-size: 14px; font-weight: bold; color: white; text-transform: uppercase; }
 
-        /* POPUP ZA UNOS NA MAPI */
+        /* POPUP ZA ADMIN KREIRANJE */
         .leaflet-popup-content-wrapper { background: rgba(15, 23, 42, 0.95) !important; color: white !important; border-radius: 14px !important; border: 1px solid rgba(255, 255, 255, 0.1); }
         .leaflet-popup-close-button { color: #ffffff !important; }
         .profi-form { display: flex; flex-direction: column; gap: 8px; width: 220px; padding: 5px; }
@@ -44,279 +72,252 @@
         .profi-input { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; padding: 8px; color: white; font-size: 12px; width: 100%; box-sizing: border-box; outline: none;}
         .profi-input:focus { border-color: #3498db; }
         .profi-submit-btn { background: #2ecc71; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 5px; }
-
-        /* BOTTOM DASHBOARD */
-        #bottom-panel { position: fixed; bottom: -85vh; left: 0; width: calc(100% - 300px); height: 85vh; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border-top-right-radius: 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.6); z-index: 2000; transition: bottom 0.4s; display: flex; flex-direction: column; }
-        #bottom-panel.open { bottom: 0; }
-        #panel-toggle-btn { position: absolute; top: -45px; left: 20px; background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 20px 20px 0 0; font-weight: bold; cursor: pointer; box-shadow: 0 -4px 15px rgba(0,0,0,0.3); text-transform: uppercase; }
-
-        .header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; }
-        .summary-stats { display: flex; gap: 15px; width: 100%; max-width: 900px; margin-top: 10px; }
-        .summary-box { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px; text-align: center; }
-        .summary-box h3 { margin: 0; font-size: 20px; color: var(--text-main); }
-        .summary-box p { margin: 2px 0 0 0; font-size: 10px; text-transform: uppercase; color: var(--text-muted); }
-        .text-orange { color: var(--accent-orange) !important; }
-        .text-blue { color: var(--accent-blue) !important; }
-
-        .tabs-container { display: flex; gap: 10px; overflow-x: auto; padding: 15px 20px; border-bottom: 1px solid var(--border-color); }
-        .tabs-container::-webkit-scrollbar { height: 4px; }
-        .tabs-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
-        .tab-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; white-space: nowrap; }
-        .tab-btn.active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
-
-        .content-area { padding: 20px; flex: 1; overflow-y: auto; display: flex; justify-content: center; }
-        .mesto-dashboard { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 15px; }
-        .form-section { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; }
-        .form-section h4 { margin: 0 0 10px 0; color: var(--accent-blue); font-size: 14px; text-transform: uppercase;}
-        .input-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;}
-        .btn-row { display: flex; gap: 10px; align-items: center; }
-        .save-btn { background: var(--accent-green); color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%;}
-        .rezultati-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        .single-dot { position: absolute; top: 0; left: 0; width: 14px; height: 14px; background: #e74c3c; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px rgba(231, 76, 60, 0.8); }
-        .custom-transparent-icon { background: transparent !important; border: none !important; }
+        #admin-badge { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: white; padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; z-index: 6000; display: none; box-shadow: 0 4px 10px rgba(231,76,60,0.4); }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-box">
-            <h2 style="margin:0; color:white;">ADMIN PRISTUP</h2>
-            <input type="password" id="global-password" placeholder="Lozinka...">
-            <button onclick="proveriLozinku()">Uđi u panel</button>
-            <p id="login-error" style="color:#ef4444; font-size:12px; display:none; margin-top:10px;">Netačna lozinka!</p>
-        </div>
-    </div>
+    <div id="admin-badge">ADMIN MODO: KREIRANJE MAPE</div>
 
-    <!-- MAPA U POZADINI -->
-    <div id="map"></div>
-
-    <!-- DESNI MENI ZA KREIRANJE -->
+    <!-- Admin Meni (Vidljiv samo ako je ?admin=da) -->
     <div id="admin-sidebar">
         <div class="admin-sidebar-header">
             <h3>Biračka Mesta</h3>
-            <p>Prevucite na mapu da kreirate</p>
+            <p>Prevucite karticu na mapu</p>
         </div>
-        <div class="admin-sidebar-content" id="drag-items-container"></div>
+        <div class="admin-sidebar-content" id="drag-items-container">
+            <!-- Puni se automatski -->
+        </div>
     </div>
 
-    <!-- DONJI PANEL ZA UNOS REZULTATA -->
-    <div id="bottom-panel">
-        <button id="panel-toggle-btn" onclick="toggleBottomPanel()">Prikaži Analitiku / Unos</button>
-        
-        <div class="header">
-            <h3 style="margin:0; color:white;">ZBIRNA ANALITIKA OPŠTINE</h3>
-            <div class="summary-stats">
-                <div class="summary-box"><h3 id="tot-upisano">0</h3><p>Upisano</p></div>
-                <div class="summary-box"><h3 id="tot-izaslo">0</h3><p>Izašlo</p></div>
-                <div class="summary-box"><h3 id="tot-procenat" class="text-orange">0%</h3><p>Izlaznost</p></div>
-                <div class="summary-box"><h3 id="tot-vazeci" class="text-blue">0</h3><p>Važećih</p></div>
-            </div>
-        </div>
+    <!-- Mapa -->
+    <div id="map"></div>
 
-        <div class="tabs-container" id="tabs-menu"></div>
-        <div class="content-area" id="admin-content">
-            <h3 style="color:var(--text-muted); text-align:center; margin-top:50px;">Izaberite biračko mesto iznad da unesete podatke.</h3>
+    <!-- TV KAJRON -->
+    <div id="kajron-container">
+        <div class="kajron-header">
+            <div class="live-dot-small"></div> IZVEŠTAJI SA BIRAČKIH MESTA (UŽIVO)
+        </div>
+        <div class="kajron-track">
+            <div class="ticker-content" id="ticker-content"></div>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        const ADMIN_LOZINKA = "admin2024";
         const firebaseConfig = { databaseURL: "https://daxgame-ad90a-default-rtdb.europe-west1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const mestaRef = ref(db, 'biracka_mesta');
 
-        // NOVI SPISAK MESTA
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAdmin = urlParams.get('admin') === 'da';
+
+        // SPISAK ZA ADMIN DRAG & DROP
         const spisakMestaDragDrop = [
-            { broj: "01", naziv: "NARODNA BIBLIOTEKA" },
-            { broj: "02", naziv: "STACIONAR" },
-            { broj: "03", naziv: "GIMNAZIJA „SV. KIRILA I METODIJA\"" },
-            { broj: "04", naziv: "DEČJI VRTIĆ" },
-            { broj: "05", naziv: "UPRAVA JP „KOMUNALAC\"" },
-            { broj: "06", naziv: "OSNOVNA ŠKOLA" },
-            { broj: "07", naziv: "CENTAR ZA KULTURU" },
-            { broj: "08", naziv: "DEČIJI VRTIĆ" },
-            { broj: "09", naziv: "ZGRADA ŠPEDICIJE NA ŽELEZNIČKOJ STANICI" },
-            { broj: "10", naziv: "DOM KULTURE – LUKAVICA" },
-            { broj: "11", naziv: "DOM KULTURE – BELEŠ" },
-            { broj: "12", naziv: "DOM KULTURE – ŽELJUŠA" },
-            { broj: "13", naziv: "OSNOVNA ŠKOLA – ŽELJUŠA" },
-            { broj: "14", naziv: "DOM KULTURE – GOJIN DOL" },
-            { broj: "15", naziv: "OSNOVNA ŠKOLA – GRADINJE" },
-            { broj: "16", naziv: "ZADRUŽNI DOM – KUSA VRANA" },
-            { broj: "17", naziv: "DOM KULTURE – TRNSKI ODOROVCI" },
-            { broj: "18", naziv: "ZADRUŽNI DOM – DONJA NEVLJA" },
-            { broj: "19", naziv: "DOM KULTURE – POGANOVO" },
-            { broj: "20", naziv: "DOM KULTURE – VISOČKI ODOROVCI" },
-            { broj: "21", naziv: "DOM KULTURE – SMILOVCI" },
-            { broj: "22", naziv: "DOM KULTURE – PROTOPOPINCI" },
+            { broj: "01", naziv: "NARODNA BIBLIOTEKA" }, { broj: "02", naziv: "STACIONAR" },
+            { broj: "03", naziv: "GIMNAZIJA „SV. KIRILA I METODIJA\"" }, { broj: "04", naziv: "DEČJI VRTIĆ" },
+            { broj: "05", naziv: "UPRAVA JP „KOMUNALAC\"" }, { broj: "06", naziv: "OSNOVNA ŠKOLA" },
+            { broj: "07", naziv: "CENTAR ZA KULTURU" }, { broj: "08", naziv: "DEČIJI VRTIĆ" },
+            { broj: "09", naziv: "ZGRADA ŠPEDICIJE NA ŽELEZNIČKOJ STANICI" }, { broj: "10", naziv: "DOM KULTURE – LUKAVICA" },
+            { broj: "11", naziv: "DOM KULTURE – BELEŠ" }, { broj: "12", naziv: "DOM KULTURE – ŽELJUŠA" },
+            { broj: "13", naziv: "OSNOVNA ŠKOLA – ŽELJUŠA" }, { broj: "14", naziv: "DOM KULTURE – GOJIN DOL" },
+            { broj: "15", naziv: "OSNOVNA ŠKOLA – GRADINJE" }, { broj: "16", naziv: "ZADRUŽNI DOM – KUSA VRANA" },
+            { broj: "17", naziv: "DOM KULTURE – TRNSKI ODOROVCI" }, { broj: "18", naziv: "ZADRUŽNI DOM – DONJA NEVLJA" },
+            { broj: "19", naziv: "DOM KULTURE – POGANOVO" }, { broj: "20", naziv: "DOM KULTURE – VISOČKI ODOROVCI" },
+            { broj: "21", naziv: "DOM KULTURE – SMILOVCI" }, { broj: "22", naziv: "DOM KULTURE – PROTOPOPINCI" },
             { broj: "23", naziv: "AMBULANTA DOMA ZDRAVLJA – IZATOVCI" }
         ];
 
-        window.politickeListe = [
-            "Aleksandar Vučić - Ujedinjena Srbija", "Ivica Dačić - Faktor stabilnosti", "Studentska lista - Studenti pobeđuju",
-            "Radim Ljajić - Ljudski", "Savez vojvođanskih Mađara - Dr Balint Pastor", "Usame Zukorlić - Pokret za ujedinjenje",
-            "Ruska stranka - Srbija u Briksu - Slobodan Nikolić", "Autentična desnica - Dr Miloš Jovanović", "Evropska Srbija - Marinika Tepić - Zdravko Ponoš",
-            "SDA Sanžaka - Čuvari Sandžaka", "Bogoljub Karić - Pokret snaga Srbije", "Liberalno zelena stranka - Za slobodnu i čistiju Srbiju",
-            "Biram pravu - Biram budućnost - Koalicija snaga...", "Stranka rusko-srpskog jedinstva - Rusi i Srbi braća zauvek",
-            "Ćale ovo je za tebe - Petar Đurić", "Vladimir Gajić - Alternativa za Srbiju", "Albanska koalicija", "Majka Srbija - Gruda"
-        ];
-
-        window.getSatiOptions = function() { let opts = ''; for(let i=0; i<24; i++) { let v = i.toString().padStart(2,'0'); opts += `<option value="${v}">${v}</option>`; } return opts; }
-        window.getMinutiOptions = function() { let opts = ''; for(let i=0; i<60; i+=5) { let v = i.toString().padStart(2,'0'); opts += `<option value="${v}">${v}</option>`; } return opts; }
-
-        var map = L.map('map', { zoomControl: false }).setView([43.0186, 22.7447], 12);
+        var map = L.map('map', { zoomControl: false, attributionControl: false }).setView([43.0186, 22.7447], 12);
         L.control.zoom({ position: 'topleft' }).addTo(map);
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
+        // ZATAMNJIVANJE TERITORIJE (Ostrvo Dimitrovgrad)
         fetch('https://nominatim.openstreetmap.org/search?q=Op%C5%A1tina+Dimitrovgrad,+Serbia&format=json&polygon_geojson=1&limit=1')
-            .then(res => res.json()).then(data => {
+            .then(response => response.json())
+            .then(data => {
                 if(data.length > 0 && data[0].geojson) {
                     var geojsonCoords = data[0].geojson.coordinates;
                     var latlngs = data[0].geojson.type === "Polygon" ? [geojsonCoords[0].map(c => [c[1], c[0]])] : geojsonCoords.map(p => p[0].map(c => [c[1], c[0]]));
-                    L.polygon([ [[-90, -180], [90, -180], [90, 180], [-90, 180]], ...latlngs ], { color: '#2980b9', weight: 3, fillOpacity: 0.8, fillColor: '#e5e5e5' }).addTo(map);
+                    L.polygon([ [[-90, -180], [90, -180], [90, 180], [-90, 180]], ...latlngs ], { color: '#2980b9', weight: 3, fillOpacity: 1, fillColor: '#e5e5e5' }).addTo(map);
                 }
             });
 
-        window.globalnaMestaData = {};
-        window.trenutniTabId = null;
-        var aktivniMarkeri = {};
-
-        window.proveriLozinku = function() {
-            if(document.getElementById('global-password').value === ADMIN_LOZINKA) {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('admin-sidebar').classList.add('open');
-                
-                // Učitavanje liste u desni meni
-                let dragContainer = document.getElementById('drag-items-container');
-                spisakMestaDragDrop.forEach(mesto => {
-                    let div = document.createElement('div');
-                    div.className = 'drag-item'; div.draggable = true;
-                    div.innerHTML = `<span class="drag-item-broj">BR. ${mesto.broj}</span><span class="drag-item-naziv">${mesto.naziv}</span>`;
-                    div.addEventListener('dragstart', (e) => { e.dataTransfer.setData('naziv', mesto.naziv); e.dataTransfer.setData('broj', mesto.broj); });
-                    dragContainer.appendChild(div);
+        // ADMIN LOGIKA: KREIRANJE PREKO MAPE
+        if (isAdmin) {
+            document.getElementById('admin-badge').style.display = 'block';
+            document.getElementById('admin-sidebar').classList.add('open');
+            
+            let dragContainer = document.getElementById('drag-items-container');
+            spisakMestaDragDrop.forEach(mesto => {
+                let div = document.createElement('div');
+                div.className = 'drag-item'; div.draggable = true;
+                div.innerHTML = `<span class="drag-item-broj">BR. ${mesto.broj}</span><span class="drag-item-naziv">${mesto.naziv}</span>`;
+                div.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('naziv', mesto.naziv); e.dataTransfer.setData('broj', mesto.broj);
                 });
-            } else { document.getElementById('login-error').style.display = 'block'; }
-        };
+                dragContainer.appendChild(div);
+            });
 
-        let panelOpen = false;
-        window.toggleBottomPanel = function() {
-            panelOpen = !panelOpen;
-            document.getElementById('bottom-panel').classList.toggle('open', panelOpen);
-            document.getElementById('panel-toggle-btn').innerText = panelOpen ? "Zatvori Panel" : "Prikaži Analitiku / Unos";
-        };
+            let mapContainer = document.getElementById('map');
+            mapContainer.addEventListener('dragover', (e) => { e.preventDefault(); });
+            mapContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                let n = e.dataTransfer.getData('naziv'); let b = e.dataTransfer.getData('broj');
+                if (!n || !b) return;
 
-        // DRAG AND DROP NA MAPU
-        let mapContainer = document.getElementById('map');
-        mapContainer.addEventListener('dragover', (e) => { e.preventDefault(); });
-        mapContainer.addEventListener('drop', (e) => {
-            e.preventDefault();
-            let n = e.dataTransfer.getData('naziv'); let b = e.dataTransfer.getData('broj');
-            if (!n || !b) return;
-            var rect = mapContainer.getBoundingClientRect();
-            var latlng = map.containerPointToLatLng([e.clientX - rect.left, e.clientY - rect.top]);
+                var rect = mapContainer.getBoundingClientRect();
+                var latlng = map.containerPointToLatLng([e.clientX - rect.left, e.clientY - rect.top]);
+                
+                var formHtml = `
+                    <div class="profi-form">
+                        <h4>POSTAVI MESTO</h4>
+                        <label>NAZIV</label><input type="text" id="inp-naz" class="profi-input" value="${n}">
+                        <label>BROJ</label><input type="text" id="inp-br" class="profi-input" value="${b}">
+                        <button class="profi-submit-btn" id="btn-save-loc">POSTAVI NA MAPU</button>
+                    </div>`;
+                L.popup({ closeOnClick: false }).setLatLng(latlng).setContent(formHtml).openOn(map);
+                
+                setTimeout(() => {
+                    document.getElementById('btn-save-loc').onclick = function() {
+                        let naziv = document.getElementById('inp-naz').value.trim().toUpperCase();
+                        let broj = document.getElementById('inp-br').value.trim().toUpperCase();
+                        if(!naziv || !broj) return alert("Popunite sva polja!");
+                        // SNIMA BEZ PINA
+                        push(mestaRef, { lat: latlng.lat, lng: latlng.lng, naziv: naziv, broj: broj }).then(() => map.closePopup());
+                    };
+                }, 100);
+            });
+        }
+
+        var aktivniMarkeri = {};
+        var globalnaMestaData = null;
+
+        function renderMapAndKajron() {
+            if (!globalnaMestaData) return;
+
+            let currentZoom = map.getZoom();
+            let isZoomedOut = currentZoom < 15;
+            let isMobile = window.innerWidth <= 600;
+
+            // Prikaz/skrivanje TV Kajrona
+            let kajronContainer = document.getElementById('kajron-container');
+            if (isZoomedOut) { kajronContainer.classList.add('visible'); } 
+            else { kajronContainer.classList.remove('visible'); }
+
+            // AŽURIRANJE KAJRONA (Samo ako ima mesta za prikaz)
+            let tickerContent = document.getElementById('ticker-content');
+            let sortiranaMestaKeys = Object.keys(globalnaMestaData).sort((a,b) => parseInt(globalnaMestaData[a].broj) - parseInt(globalnaMestaData[b].broj));
             
-            var formHtml = `
-                <div class="profi-form">
-                    <h4>KREIRAJ MESTO</h4>
-                    <label>NAZIV</label><input type="text" id="inp-naz" class="profi-input" value="${n}">
-                    <label>BROJ</label><input type="text" id="inp-br" class="profi-input" value="${b}">
-                    <label>PIN (ZA KONTROLORA)</label><input type="text" id="inp-pn" class="profi-input" placeholder="NPR. 5566" oninput="this.value = this.value.toUpperCase()">
-                    <button class="profi-submit-btn" id="btn-save-loc">SAČUVAJ</button>
-                </div>`;
-            L.popup({ closeOnClick: false }).setLatLng(latlng).setContent(formHtml).openOn(map);
-            
-            setTimeout(() => {
-                document.getElementById('btn-save-loc').onclick = function() {
-                    let naziv = document.getElementById('inp-naz').value.trim().toUpperCase();
-                    let broj = document.getElementById('inp-br').value.trim().toUpperCase();
-                    let pin = document.getElementById('inp-pn').value.trim().toUpperCase();
-                    if(!naziv || !broj || !pin) return alert("Popunite sva polja!");
-                    push(mestaRef, { lat: latlng.lat, lng: latlng.lng, naziv: naziv, broj: broj, pin: pin }).then(() => map.closePopup());
-                };
-            }, 100);
-        });
+            let kajronHtml = '';
+            sortiranaMestaKeys.forEach(id => {
+                let m = globalnaMestaData[id];
+                let u = m.ukupan_broj || 0; 
+                let i = m.izaslo || 0;
+                let procenat = u > 0 ? ((i / u) * 100).toFixed(1) : 0;
+                let vremeTxt = m.vreme_update ? m.vreme_update + 'h' : '--:--';
 
-        onValue(mestaRef, (snapshot) => {
+                kajronHtml += `
+                    <div class="kajron-card">
+                        <div class="kc-title"><span class="kc-broj">${m.broj}.</span> ${m.naziv}</div>
+                        <div class="kc-data">
+                            <div><div class="kc-label">Izlaznost</div><div class="kc-perc">${procenat}%</div></div>
+                        </div>
+                        <div class="kc-stats">
+                            <span>Glasalo: <strong>${i} / ${u}</strong></span>
+                            <span>Presek: <strong>${vremeTxt}</strong></span>
+                        </div>
+                    </div>
+                `;
+            });
+            // Duplicirano za beskonačan loop
+            if(kajronHtml !== '') { tickerContent.innerHTML = kajronHtml + kajronHtml; }
+
+
+            // CRTANJE MARKERA NA MAPI
             for (let id in aktivniMarkeri) map.removeLayer(aktivniMarkeri[id]);
             aktivniMarkeri = {};
-            
-            const data = snapshot.val();
-            if (!data) return;
-            window.globalnaMestaData = data; 
 
-            // Crtamo tačke na mapi
-            Object.keys(data).forEach(id => {
-                var icon = L.divIcon({ className: 'custom-transparent-icon', html: `<div class="single-dot" title="${data[id].naziv}"></div>`, iconSize: [0,0] });
-                aktivniMarkeri[id] = L.marker([data[id].lat, data[id].lng], { icon: icon }).addTo(map);
+            let grupe = [];
+            const DISTANCE_THRESHOLD = 0.002; 
+            Object.keys(globalnaMestaData).forEach(id => {
+                let m = globalnaMestaData[id];
+                let dodato = false;
+                for (let g of grupe) {
+                    let dx = g.lat - m.lat; let dy = g.lng - m.lng;
+                    if (Math.sqrt(dx*dx + dy*dy) < DISTANCE_THRESHOLD) { g.mesta.push({...m, id: id}); dodato = true; break; }
+                }
+                if (!dodato) { grupe.push({ lat: m.lat, lng: m.lng, mesta: [{...m, id: id}] }); }
             });
-            
-            osveziZbirnuStatistiku();
-            osveziTabove();
-            if(window.trenutniTabId) otvoriMesto(window.trenutniTabId);
+
+            grupe.forEach((g, indexGroup) => {
+                let count = g.mesta.length;
+
+                if (isZoomedOut) {
+                    // ODZUMIRANO - Samo tačke (na klik zumira, NE OTVARA PIN PROZOR)
+                    let clusterHtml = count > 1 ? `<div class="cluster-dot" title="Biračkih mesta: ${count}">${count}</div>` : `<div class="single-dot" title="${g.mesta[0].naziv}"></div>`;
+                    var pinIcon = L.divIcon({ className: 'custom-transparent-icon', html: clusterHtml, iconSize: [0, 0], iconAnchor: [0, 0] });
+                    var marker = L.marker([g.lat, g.lng], { icon: pinIcon }).addTo(map);
+                    
+                    marker.on('click', () => { map.setView([g.lat, g.lng], 16, { animate: true }); });
+                    aktivniMarkeri['group_' + indexGroup] = marker;
+
+                } else {
+                    // ZUMIRANO - Velike table (SAMO ZA GLEDANJE, NEMA KLIKANJA ZA UNOS)
+                    g.mesta.forEach((mesto, index) => {
+                        let angle, distance;
+                        let baseDistance = isMobile ? 50 : 80;
+
+                        if (count === 1) { angle = -Math.PI / 2; distance = isMobile ? 40 : 60; } 
+                        else if (count === 2) { angle = (index === 0) ? -Math.PI/4 : -3*Math.PI/4; distance = baseDistance + 10; } 
+                        else { angle = (index / count) * 2 * Math.PI - (Math.PI / 2); distance = baseDistance + (count * 10); }
+
+                        let offsetX = Math.cos(angle) * distance;
+                        let offsetY = Math.sin(angle) * distance;
+
+                        let izlaznostHtml = '';
+                        if(mesto.ukupan_broj && mesto.izaslo) {
+                            let procenat = ((mesto.izaslo / mesto.ukupan_broj) * 100).toFixed(1);
+                            let vremeTxt = mesto.vreme_update ? ` do ${mesto.vreme_update}h` : '';
+                            izlaznostHtml = `<div class="live-turnout">👥 ${procenat}% ${vremeTxt}</div>`;
+                        }
+
+                        let pinHtml = `
+                            <div style="position: relative; width: 0; height: 0; overflow: visible;">
+                                <svg style="position: absolute; top: -300px; left: -300px; width: 600px; height: 600px; z-index: 998; pointer-events: none;">
+                                    <line x1="300" y1="300" x2="${300 + offsetX}" y2="${300 + offsetY}" stroke="#3498db" stroke-width="2.5" stroke-dasharray="5,5"/>
+                                    <circle cx="${300 + offsetX}" cy="${300 + offsetY}" r="3" fill="#3498db" />
+                                </svg>
+                                <div style="position: absolute; top: 0; left: 0; width: 12px; height: 12px; background: #e74c3c; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); z-index: 999; box-shadow: 0 0 10px rgba(231, 76, 60, 0.8);"></div>
+                                <div class="map-board" style="position: absolute; top: ${offsetY}px; left: ${offsetX}px; transform: translate(-50%, -50%); z-index: 1000; filter: drop-shadow(0 8px 15px rgba(0,0,0,0.25)); pointer-events: none;">
+                                    ${izlaznostHtml}
+                                    <span class="board-title">${mesto.naziv}</span>
+                                    <span class="board-number">BR: ${mesto.broj}</span>
+                                </div>
+                            </div>
+                        `;
+
+                        var markerIcon = L.divIcon({ className: 'custom-transparent-icon', html: pinHtml, iconSize: [0, 0], iconAnchor: [0, 0] });
+                        var marker = L.marker([mesto.lat, mesto.lng], { icon: markerIcon }).addTo(map);
+                        aktivniMarkeri[mesto.id] = marker;
+                    });
+                }
+            });
+        }
+
+        onValue(mestaRef, (snapshot) => {
+            globalnaMestaData = snapshot.val();
+            renderMapAndKajron();
         });
 
-        function osveziZbirnuStatistiku() {
-            let opstinaUpisano = 0, opstinaIzaslo = 0, opstinaVazeci = 0;
-            Object.values(window.globalnaMestaData).forEach(m => {
-                if (m.ukupan_broj) opstinaUpisano += parseInt(m.ukupan_broj);
-                if (m.izaslo) opstinaIzaslo += parseInt(m.izaslo);
-                if (m.rezultati) Object.values(m.rezultati).forEach(g => opstinaVazeci += parseInt(g) || 0);
-            });
-            document.getElementById('tot-upisano').innerText = opstinaUpisano;
-            document.getElementById('tot-izaslo').innerText = opstinaIzaslo;
-            document.getElementById('tot-vazeci').innerText = opstinaVazeci;
-            document.getElementById('tot-procenat').innerText = (opstinaUpisano > 0 ? ((opstinaIzaslo / opstinaUpisano) * 100).toFixed(1) : 0) + "%";
-        }
+        map.on('zoomend', renderMapAndKajron);
+        window.addEventListener('resize', renderMapAndKajron);
 
-        function osveziTabove() {
-            let menu = document.getElementById('tabs-menu');
-            let keys = Object.keys(window.globalnaMestaData).sort((a,b) => parseInt(window.globalnaMestaData[a].broj) - parseInt(window.globalnaMestaData[b].broj));
-            menu.innerHTML = keys.map(id => `<button class="tab-btn ${id === window.trenutniTabId ? 'active' : ''}" onclick="otvoriMesto('${id}')">BR. ${window.globalnaMestaData[id].broj} - ${window.globalnaMestaData[id].naziv}</button>`).join('');
-        }
-
-        window.otvoriMesto = function(id) {
-            window.trenutniTabId = id; osveziTabove();
-            let m = window.globalnaMestaData[id];
-            
-            let strankeHtml = window.politickeListe.map((ime, idx) => `
-                <div class="input-group"><label>${idx + 1}. ${ime}</label>
-                <input type="number" id="rez-${idx}" class="profi-input" value="${(m.rezultati && m.rezultati[idx]) ? m.rezultati[idx] : ''}" placeholder="Glasovi"></div>
-            `).join('');
-
-            document.getElementById('admin-content').innerHTML = `
-                <div class="mesto-dashboard">
-                    <h2 style="text-align:center; margin:0; border-bottom:1px solid #334155; padding-bottom:15px;">BR. ${m.broj} - ${m.naziv} <span style="color:#10b981; font-size:12px; display:block; margin-top:5px;">🔑 PIN: ${m.pin || 'NEMA'}</span></h2>
-                    <div class="form-section"><h4>1. Upisani Birači</h4>
-                        <div class="btn-row"><input type="number" id="inp-upi" class="profi-input" value="${m.ukupan_broj || ''}">
-                        <button class="save-btn" onclick="update(ref(db, 'biracka_mesta/${id}'), { ukupan_broj: parseInt(document.getElementById('inp-upi').value) })">Snimi</button></div>
-                    </div>
-                    <div class="form-section"><h4>2. Izlaznost</h4>
-                        <div class="input-group"><label>Izašlo glasača:</label><input type="number" id="inp-izl" class="profi-input" value="${m.izaslo || ''}"></div>
-                        <div class="input-group"><label>Vreme:</label><div class="btn-row">
-                        <select id="inp-sat" class="profi-input">${getSatiOptions()}</select><span style="color:white;">:</span><select id="inp-min" class="profi-input">${getMinutiOptions()}</select>
-                        </div></div>
-                        <button class="save-btn" onclick="update(ref(db, 'biracka_mesta/${id}'), { izaslo: parseInt(document.getElementById('inp-izl').value), vreme_update: document.getElementById('inp-sat').value+':'+document.getElementById('inp-min').value })">Snimi Izlaznost</button>
-                    </div>
-                    <div class="form-section"><h4>3. Rezultati</h4>
-                        <div class="rezultati-grid">${strankeHtml}</div>
-                        <button class="save-btn" style="margin-top:10px;" onclick="snimiRez('${id}')">Snimi Rezultate</button>
-                    </div>
-                </div>
-            `;
-            if(m.vreme_update) { document.getElementById('inp-sat').value = m.vreme_update.split(':')[0]; document.getElementById('inp-min').value = m.vreme_update.split(':')[1]; }
-        };
-
-        window.snimiRez = function(id) {
-            let r = {};
-            window.politickeListe.forEach((_, idx) => { let v = document.getElementById(`rez-${idx}`).value; if (v !== '') r[idx] = parseInt(v); });
-            update(ref(db, 'biracka_mesta/' + id), { rezultati: r });
-        };
     </script>
 </body>
 </html>
