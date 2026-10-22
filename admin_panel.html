@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Centar - Caribrodski Izbori</title>
+    
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-orange: #f59e0b;
+            --accent-green: #10b981;
+            --border-color: #334155;
+        }
+
+        html, body {
+            margin: 0; padding: 0; font-family: -apple-system, sans-serif;
+            background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh;
+        }
+
+        /* LOGIN SCREEN */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+        .login-box {
+            background: var(--bg-card); padding: 40px; border-radius: 16px; border: 1px solid var(--border-color);
+            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 300px;
+        }
+        .login-box input {
+            width: 100%; padding: 12px; margin: 20px 0; border-radius: 8px; border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.05); color: white; outline: none; box-sizing: border-box; font-size: 16px; text-align: center;
+        }
+        .login-box button {
+            width: 100%; padding: 12px; background: var(--accent-blue); color: white; border: none; border-radius: 8px;
+            font-weight: bold; font-size: 16px; cursor: pointer; text-transform: uppercase;
+        }
+
+        /* MAIN CONTENT */
+        #main-app { display: none; flex-direction: column; height: 100vh; }
+
+        .header {
+            background: rgba(30, 41, 59, 0.9); padding: 20px; border-bottom: 1px solid var(--border-color);
+            display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .header-title { margin: 0 0 15px 0; font-size: 20px; color: var(--text-main); text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+        .live-dot { width: 12px; height: 12px; background: #ef4444; border-radius: 50%; animation: pulseRed 1.5s infinite; }
+        @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+
+        .summary-stats { display: flex; gap: 15px; width: 100%; max-width: 900px; }
+        .summary-box { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; text-align: center; }
+        .summary-box h3 { margin: 0; font-size: 24px; color: var(--text-main); }
+        .summary-box p { margin: 5px 0 0 0; font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: bold; }
+        .text-orange { color: var(--accent-orange) !important; }
+        .text-blue { color: var(--accent-blue) !important; }
+
+        /* TABS */
+        .tabs-container {
+            display: flex; gap: 10px; overflow-x: auto; padding: 15px 20px; background: var(--bg-dark);
+            border-bottom: 1px solid var(--border-color); scroll-behavior: smooth; user-select: none;
+        }
+        .tabs-container::-webkit-scrollbar { height: 4px; }
+        .tabs-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        .tab-btn {
+            background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted);
+            padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold;
+            white-space: nowrap; transition: 0.3s; text-transform: uppercase;
+        }
+        .tab-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+        .tab-btn.active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+
+        /* TAB CONTENT */
+        .content-area { padding: 30px 20px; flex: 1; overflow-y: auto; display: flex; justify-content: center; }
+        
+        .mesto-dashboard {
+            width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 20px;
+        }
+
+        .mesto-naslov { text-align: center; margin: 0; font-size: 22px; color: white; text-transform: uppercase; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;}
+
+        /* FORME ZA UNOS */
+        .form-section {
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .form-section h4 { margin: 0 0 10px 0; color: var(--accent-blue); font-size: 16px; text-transform: uppercase;}
+        
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        .input-group label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: bold;}
+        .profi-input {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 6px;
+            padding: 10px; color: white; font-size: 14px; outline: none; width: 100%; box-sizing: border-box;
+        }
+        .profi-input:focus { border-color: var(--accent-blue); }
+        select.profi-input option { background-color: var(--bg-dark); color: white; }
+        
+        .btn-row { display: flex; gap: 10px; align-items: center; }
+        .save-btn {
+            background: var(--accent-green); color: white; border: none; padding: 12px 20px;
+            border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s;
+        }
+        .save-btn:hover { opacity: 0.8; }
+
+        .rezultati-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        @media (max-width: 600px) { .rezultati-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <!-- Ekran za prijavu -->
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="margin:0; color:white;">ADMIN PRISTUP</h2>
+            <p style="color:#94a3b8; font-size:12px;">Unesite globalnu lozinku</p>
+            <input type="password" id="global-password" placeholder="Lozinka...">
+            <button onclick="proveriLozinku()">Uđi u panel</button>
+            <p id="login-error" style="color:#ef4444; font-size:12px; display:none; margin-top:10px;">Netačna lozinka!</p>
+        </div>
+    </div>
+
+    <!-- Glavna aplikacija -->
+    <div id="main-app">
+        <div class="header">
+            <h1 class="header-title"><div class="live-dot"></div> ZBIRNA ANALITIKA OPŠTINE</h1>
+            <div class="summary-stats">
+                <div class="summary-box">
+                    <h3 id="tot-upisano">0</h3><p>Upisanih birača</p>
+                </div>
+                <div class="summary-box">
+                    <h3 id="tot-izaslo">0</h3><p>Izašlo na glasanje</p>
+                </div>
+                <div class="summary-box">
+                    <h3 id="tot-procenat" class="text-orange">0%</h3><p>Ukupna Izlaznost</p>
+                </div>
+                <div class="summary-box">
+                    <h3 id="tot-vazeci" class="text-blue">0</h3><p>Važećih glasova</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs-container" id="tabs-menu">
+            <!-- Puni se automatski -->
+        </div>
+
+        <div class="content-area" id="admin-content">
+            <h3 style="color:var(--text-muted); text-align:center;">Izaberite biračko mesto iz menija iznad da biste uneli podatke.</h3>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // GLOBALNA LOZINKA ZA ULAZ
+        const ADMIN_LOZINKA = "admin2024";
+
+        const firebaseConfig = { databaseURL: "https://daxgame-ad90a-default-rtdb.europe-west1.firebasedatabase.app/" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const mestaRef = ref(db, 'biracka_mesta');
+
+        window.politickeListe = [
+            "Aleksandar Vučić - Ujedinjena Srbija", "Ivica Dačić - Faktor stabilnosti", "Studentska lista - Studenti pobeđuju",
+            "Radim Ljajić - Ljudski", "Savez vojvođanskih Mađara - Dr Balint Pastor", "Usame Zukorlić - Pokret za ujedinjenje",
+            "Ruska stranka - Srbija u Briksu - Slobodan Nikolić", "Autentična desnica - Dr Miloš Jovanović", "Evropska Srbija - Marinika Tepić - Zdravko Ponoš",
+            "SDA Sanžaka - Čuvari Sandžaka", "Bogoljub Karić - Pokret snaga Srbije", "Liberalno zelena stranka - Za slobodnu i čistiju Srbiju",
+            "Biram pravu - Biram budućnost - Koalicija snaga...", "Stranka rusko-srpskog jedinstva - Rusi i Srbi braća zauvek",
+            "Ćale ovo je za tebe - Petar Đurić", "Vladimir Gajić - Alternativa za Srbiju", "Albanska koalicija", "Majka Srbija - Gruda"
+        ];
+
+        window.getSatiOptions = function() { let opts = ''; for(let i=0; i<24; i++) { let v = i.toString().padStart(2,'0'); opts += `<option value="${v}">${v}</option>`; } return opts; }
+        window.getMinutiOptions = function() { let opts = ''; for(let i=0; i<60; i+=5) { let v = i.toString().padStart(2,'0'); opts += `<option value="${v}">${v}</option>`; } return opts; }
+
+        window.globalnaMestaData = {};
+        window.trenutniTabId = null;
+
+        // LOGIN LOGIKA
+        window.proveriLozinku = function() {
+            let pass = document.getElementById('global-password').value;
+            if(pass === ADMIN_LOZINKA) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'flex';
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+            }
+        };
+
+        onValue(mestaRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+            window.globalnaMestaData = data; 
+            
+            osveziZbirnuStatistiku();
+            osveziTabove();
+            
+            if(window.trenutniTabId) {
+                otvoriMesto(window.trenutniTabId);
+            }
+        });
+
+        function osveziZbirnuStatistiku() {
+            let opstinaUpisano = 0, opstinaIzaslo = 0, opstinaVazeci = 0;
+            
+            Object.values(window.globalnaMestaData).forEach(m => {
+                if (m.ukupan_broj) opstinaUpisano += parseInt(m.ukupan_broj);
+                if (m.izaslo) opstinaIzaslo += parseInt(m.izaslo);
+                if (m.rezultati) {
+                    Object.values(m.rezultati).forEach(g => {
+                        opstinaVazeci += parseInt(g) || 0;
+                    });
+                }
+            });
+
+            document.getElementById('tot-upisano').innerText = opstinaUpisano;
+            document.getElementById('tot-izaslo').innerText = opstinaIzaslo;
+            document.getElementById('tot-vazeci').innerText = opstinaVazeci;
+            
+            let proc = opstinaUpisano > 0 ? ((opstinaIzaslo / opstinaUpisano) * 100).toFixed(1) : 0;
+            document.getElementById('tot-procenat').innerText = proc + "%";
+        }
+
+        function osveziTabove() {
+            let menu = document.getElementById('tabs-menu');
+            let sortiranaMestaKeys = Object.keys(window.globalnaMestaData).sort((a,b) => parseInt(window.globalnaMestaData[a].broj) - parseInt(window.globalnaMestaData[b].broj));
+            
+            let html = ``;
+            sortiranaMestaKeys.forEach(id => {
+                let m = window.globalnaMestaData[id];
+                let isActive = id === window.trenutniTabId ? 'active' : '';
+                html += `<button class="tab-btn ${isActive}" onclick="otvoriMesto('${id}')">BR. ${m.broj} - ${m.naziv}</button>`;
+            });
+            menu.innerHTML = html;
+        }
+
+        window.otvoriMesto = function(id) {
+            window.trenutniTabId = id;
+            osveziTabove(); // da se oboji aktivan tab
+
+            let m = window.globalnaMestaData[id];
+            let area = document.getElementById('admin-content');
+            
+            let uBroj = m.ukupan_broj || '';
+            let izaslo = m.izaslo || '';
+            let h = m.vreme_update ? m.vreme_update.split(':')[0] : '12';
+            let min = m.vreme_update ? m.vreme_update.split(':')[1] : '00';
+            let r = m.rezultati || {};
+
+            let strankeHtml = window.politickeListe.map((ime, idx) => `
+                <div class="input-group">
+                    <label>${idx + 1}. ${ime}</label>
+                    <input type="number" id="rez-${idx}" class="profi-input" value="${r[idx] !== undefined ? r[idx] : ''}" placeholder="Glasovi">
+                </div>
+            `).join('');
+
+            area.innerHTML = `
+                <div class="mesto-dashboard">
+                    <h2 class="mesto-naslov">BIRAČKO MESTO BR. ${m.broj} - ${m.naziv}</h2>
+                    
+                    <div class="form-section">
+                        <h4>1. Upisani Birači</h4>
+                        <div class="btn-row">
+                            <input type="number" id="inp-upisano" class="profi-input" value="${uBroj}" placeholder="Ukupan broj glasača">
+                            <button class="save-btn" onclick="snimiUpisano('${id}')">Snimi</button>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h4>2. Trenutna Izlaznost</h4>
+                        <div class="input-group">
+                            <label>Izašlo glasača:</label>
+                            <input type="number" id="inp-izaslo" class="profi-input" value="${izaslo}" placeholder="Broj">
+                        </div>
+                        <div class="input-group">
+                            <label>Vreme preseka:</label>
+                            <div class="btn-row">
+                                <select id="inp-sat" class="profi-input">${getSatiOptions()}</select>
+                                <span style="color:white;">:</span>
+                                <select id="inp-min" class="profi-input">${getMinutiOptions()}</select>
+                            </div>
+                        </div>
+                        <button class="save-btn" style="margin-top:10px; width:100%;" onclick="snimiIzlaznost('${id}')">Snimi Izlaznost</button>
+                    </div>
+
+                    <div class="form-section">
+                        <h4>3. Rezultati Glasanja</h4>
+                        <div class="rezultati-grid">
+                            ${strankeHtml}
+                        </div>
+                        <button class="save-btn" style="margin-top:15px; width:100%;" onclick="snimiRezultate('${id}')">Snimi Sve Rezultate</button>
+                    </div>
+                </div>
+            `;
+
+            // Podesi selektovana vremena
+            if(document.getElementById('inp-sat')) {
+                document.getElementById('inp-sat').value = h;
+                document.getElementById('inp-min').value = min;
+            }
+        };
+
+        // FUNKCIJE ZA SNIMANJE U BAZU
+        window.snimiUpisano = function(id) {
+            let val = document.getElementById('inp-upisano').value;
+            if(!val) return;
+            update(ref(db, 'biracka_mesta/' + id), { ukupan_broj: parseInt(val) });
+        };
+
+        window.snimiIzlaznost = function(id) {
+            let izaslo = document.getElementById('inp-izaslo').value;
+            let sat = document.getElementById('inp-sat').value;
+            let min = document.getElementById('inp-min').value;
+            if(!izaslo) return;
+            update(ref(db, 'biracka_mesta/' + id), { izaslo: parseInt(izaslo), vreme_update: `${sat}:${min}` });
+        };
+
+        window.snimiRezultate = function(id) {
+            let rez = {};
+            window.politickeListe.forEach((_, idx) => {
+                let v = document.getElementById(`rez-${idx}`).value;
+                if (v !== '') rez[idx] = parseInt(v);
+            });
+            update(ref(db, 'biracka_mesta/' + id), { rezultati: rez });
+        };
+
+        // Opciono: drag-to-scroll za tabove
+        window.addEventListener('load', () => {
+            let slider = document.getElementById('tabs-menu');
+            let isDown = false, startX, scrollLeft;
+            slider.addEventListener('mousedown', (e) => { isDown = true; startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft; });
+            slider.addEventListener('mouseleave', () => isDown = false);
+            slider.addEventListener('mouseup', () => isDown = false);
+            slider.addEventListener('mousemove', (e) => {
+                if(!isDown) return;
+                e.preventDefault();
+                let x = e.pageX - slider.offsetLeft;
+                slider.scrollLeft = scrollLeft - (x - startX) * 2;
+            });
+            slider.addEventListener('wheel', (e) => { if(e.deltaY !== 0) { e.preventDefault(); slider.scrollLeft += e.deltaY; } });
+        });
+    </script>
+</body>
+</html>
