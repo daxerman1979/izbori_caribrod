@@ -3,22 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dimitrovgrad - Biračka Mesta</title>
+    <title>Dimitrovgrad - Izborna Mapa Uživo</title>
     
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    
     <style>
         html, body { margin: 0; padding: 0; height: 100%; width: 100%; font-family: -apple-system, sans-serif; overflow: hidden; background: #e5e5e5; }
-        #map { width: 100%; height: 100vh; background: #1e293b; } /* Tamnija pozadina van granica */
+        
+        /* Pozadina ispod same mape */
+        #map { width: 100%; height: 100vh; background: #e5e5e5; }
         
         .custom-transparent-icon { background: transparent !important; border: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
-        .map-pin-container { position: absolute; top: 0; left: 0; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.25)); z-index: 1000; }
         
-        .map-board { background: #ffffff; border-radius: 8px; padding: 8px 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 90px; max-width: 220px; position: relative; }
-        .live-turnout { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 12px; margin-bottom: 4px; box-shadow: 0 2px 8px rgba(243, 156, 18, 0.5); white-space: nowrap; }
+        /* Izgled same table */
+        .map-board { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); border-radius: 8px; padding: 8px 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 100px; max-width: 220px; border: 1px solid rgba(52, 152, 219, 0.3); }
+        .live-turnout { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; font-size: 13px; font-weight: bold; padding: 4px 12px; border-radius: 12px; margin-bottom: 4px; box-shadow: 0 2px 8px rgba(243, 156, 18, 0.5); white-space: nowrap; }
         
-        .board-title { font-size: 13px; font-weight: 800; color: #1e293b; text-align: center; line-height: 1.2; text-transform: uppercase; }
-        .board-number { font-size: 11px; color: #ef4444; font-weight: 700; background: #fee2e2; padding: 2px 10px; border-radius: 12px; text-transform: uppercase; }
-        .map-triangle { width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #ffffff; margin-top: -1px; }
+        .board-title { font-size: 12px; font-weight: 800; color: #1e293b; text-align: center; line-height: 1.2; text-transform: uppercase; }
+        .board-number { font-size: 11px; color: #ef4444; font-weight: 700; background: #fee2e2; padding: 2px 10px; border-radius: 12px; text-transform: uppercase; margin-top: 2px;}
     </style>
 </head>
 <body>
@@ -30,68 +33,133 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // Vaša baza podataka
         const firebaseConfig = { databaseURL: "https://daxgame-ad90a-default-rtdb.europe-west1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const mestaRef = ref(db, 'biracka_mesta');
 
+        // Kreiranje mape (Dimitrovgrad je u centru)
         var map = L.map('map', { zoomControl: false }).setView([43.0186, 22.7447], 12);
         L.control.zoom({ position: 'topleft' }).addTo(map);
-        
-        // Svetla mapa
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
-        // ZATAMNJIVANJE TERITORIJE VAN OPŠTINE
+        // 1. ZATAMNJIVANJE TERITORIJE VAN OPŠTINE (Stvara efekat izolovanog ostrva)
         fetch('https://nominatim.openstreetmap.org/search?q=Op%C5%A1tina+Dimitrovgrad,+Serbia&format=json&polygon_geojson=1&limit=1')
             .then(response => response.json())
             .then(data => {
                 if(data.length > 0 && data[0].geojson) {
                     var geojsonCoords = data[0].geojson.coordinates;
-                    if(data[0].geojson.type === "Polygon") geojsonCoords = [geojsonCoords];
+                    var latlngs = [];
                     
-                    var latlngs = geojsonCoords.map(poly => poly[0].map(coord => [coord[1], coord[0]]));
+                    if(data[0].geojson.type === "Polygon") {
+                        latlngs.push(geojsonCoords[0].map(coord => [coord[1], coord[0]]));
+                    } else if (data[0].geojson.type === "MultiPolygon") {
+                        geojsonCoords.forEach(poly => { latlngs.push(poly[0].map(coord => [coord[1], coord[0]])); });
+                    }
+                    
                     var worldBounds = [[-90, -180], [90, -180], [90, 180], [-90, 180]];
+                    var maskLayers = [worldBounds];
+                    latlngs.forEach(hole => maskLayers.push(hole));
                     
-                    // Crtanje maske (crna polutransparentna pozadina sa "rupom" u obliku Dimitrovgrada)
-                    L.polygon([worldBounds, ...latlngs], {
-                        color: '#1e293b', weight: 2, fillOpacity: 0.7, fillColor: '#0f172a'
+                    // Maska sa 100% neprovidnošću (fillOpacity: 1) krije ostatak sveta
+                    L.polygon(maskLayers, {
+                        color: '#2980b9',     // Plava ivica oko Dimitrovgrada
+                        weight: 3,            // Debljina ivice
+                        fillOpacity: 1,       // Potpuno prekrivanje okoline
+                        fillColor: '#e5e5e5'  // Ista siva kao pozadina prozora
                     }).addTo(map);
                 }
             });
 
         var aktivniMarkeri = {};
 
+        // 2. ČITANJE IZ BAZE I MATEMATIKA ZA SPREČAVANJE PREKLAPANJA
         onValue(mestaRef, (snapshot) => {
             for (let id in aktivniMarkeri) map.removeLayer(aktivniMarkeri[id]);
             aktivniMarkeri = {};
             const data = snapshot.val();
             if (!data) return;
 
-            Object.keys(data).forEach((id) => {
-                let mesto = data[id];
-                
-                let izlaznostHtml = '';
-                if(mesto.ukupan_broj && mesto.izaslo) {
-                    let procenat = ((mesto.izaslo / mesto.ukupan_broj) * 100).toFixed(1);
-                    let vremeTxt = mesto.vreme_update ? ` do ${mesto.vreme_update}h` : '';
-                    izlaznostHtml = `<div class="live-turnout">👥 ${procenat}% ${vremeTxt}</div>`;
+            // Grupisanje mesta koja su na udaljenosti manjoj od ~200 metara (sprečava preklapanje u centru grada)
+            let grupe = [];
+            const DISTANCE_THRESHOLD = 0.002; 
+
+            Object.keys(data).forEach(id => {
+                let m = data[id];
+                let dodato = false;
+                for (let g of grupe) {
+                    let dx = g.lat - m.lat;
+                    let dy = g.lng - m.lng;
+                    if (Math.sqrt(dx*dx + dy*dy) < DISTANCE_THRESHOLD) {
+                        g.mesta.push({...m, id: id});
+                        dodato = true;
+                        break;
+                    }
                 }
+                if (!dodato) {
+                    grupe.push({ lat: m.lat, lng: m.lng, mesta: [{...m, id: id}] });
+                }
+            });
 
-                var pinHtml = `
-                    <div class="map-pin-container">
-                        <div class="map-board">
-                            ${izlaznostHtml}
-                            <span class="board-title">${mesto.naziv}</span>
-                            <span class="board-number">BR: ${mesto.broj}</span>
-                        </div>
-                        <div class="map-triangle"></div>
-                    </div>`;
-
-                var pinIcon = L.divIcon({ className: 'custom-transparent-icon', html: pinHtml, iconSize: [0, 0], iconAnchor: [0, 0] });
+            // Iscrtavanje za svaku grupu
+            grupe.forEach(g => {
+                let count = g.mesta.length;
                 
-                // Samo kreiramo marker, bez ikakvih funkcija klika
-                var marker = L.marker([mesto.lat, mesto.lng], { icon: pinIcon }).addTo(map);
-                aktivniMarkeri[id] = marker;
+                g.mesta.forEach((mesto, index) => {
+                    let angle, distance;
+                    
+                    // Algoritam za raspored: Ako je jedno mesto ide pravo gore. Ako ih ima više, prave se krugovi oko zgrade!
+                    if (count === 1) {
+                        angle = -Math.PI / 2; // Pravo gore
+                        distance = 70;        // Udaljenost linije od kuglice (u pikselima)
+                    } else if (count === 2) {
+                        angle = (index === 0) ? -Math.PI/4 : -3*Math.PI/4; // "V" oblik za 2 mesta
+                        distance = 90;
+                    } else {
+                        angle = (index / count) * 2 * Math.PI - (Math.PI / 2); // Lepeza/Krug za 3 ili više mesta
+                        distance = 100 + (count * 6); // Širi krug ako ima puno mesta
+                    }
+
+                    // Matematički ofset u pikselima (koliko se tabla pomera od centra)
+                    let offsetX = Math.cos(angle) * distance;
+                    let offsetY = Math.sin(angle) * distance;
+
+                    // HTML za podatke o izlaznosti
+                    let izlaznostHtml = '';
+                    if(mesto.ukupan_broj && mesto.izaslo) {
+                        let procenat = ((mesto.izaslo / mesto.ukupan_broj) * 100).toFixed(1);
+                        let vremeTxt = mesto.vreme_update ? ` do ${mesto.vreme_update}h` : '';
+                        izlaznostHtml = `<div class="live-turnout">👥 ${procenat}% ${vremeTxt}</div>`;
+                    }
+
+                    // KREIRANJE GRAFIKE (Kuglica, isprekidana linija, i izmeštena tabla)
+                    let pinHtml = `
+                        <div style="position: relative; width: 0; height: 0; overflow: visible;">
+                            
+                            <!-- SVG Crtanje linije (Povezuje centar mape i izmestenu tablu) -->
+                            <svg style="position: absolute; top: -300px; left: -300px; width: 600px; height: 600px; z-index: 998; pointer-events: none;">
+                                <line x1="300" y1="300" x2="${300 + offsetX}" y2="${300 + offsetY}" stroke="#3498db" stroke-width="2.5" stroke-dasharray="5,5"/>
+                                <!-- Mala plava spojnica kod same table -->
+                                <circle cx="${300 + offsetX}" cy="${300 + offsetY}" r="3" fill="#3498db" />
+                            </svg>
+
+                            <!-- Crvena kuglica tačno na pravoj lokaciji zgrade -->
+                            <div style="position: absolute; top: 0; left: 0; width: 14px; height: 14px; background: #e74c3c; border: 3px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); z-index: 999; box-shadow: 0 0 10px rgba(231, 76, 60, 0.8);"></div>
+
+                            <!-- Sama kartica/tabla gurnuta u ofset da se ne bi preklapala -->
+                            <div class="map-board" style="position: absolute; top: ${offsetY}px; left: ${offsetX}px; transform: translate(-50%, -50%); z-index: 1000; filter: drop-shadow(0 8px 15px rgba(0,0,0,0.25));">
+                                ${izlaznostHtml}
+                                <span class="board-title">${mesto.naziv}</span>
+                                <span class="board-number">BR: ${mesto.broj}</span>
+                            </div>
+                        </div>
+                    `;
+
+                    var pinIcon = L.divIcon({ className: 'custom-transparent-icon', html: pinHtml, iconSize: [0, 0], iconAnchor: [0, 0] });
+                    var marker = L.marker([mesto.lat, mesto.lng], { icon: pinIcon }).addTo(map);
+                    aktivniMarkeri[mesto.id] = marker;
+                });
             });
         });
     </script>
