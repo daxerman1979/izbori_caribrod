@@ -15,7 +15,7 @@
         
         .custom-transparent-icon { background: transparent !important; border: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
         
-        /* -- STILOVI ZA DETALJNE TABLE (KADA JE ZUMIRANO) -- */
+        /* -- STILOVI ZA DETALJNE TABLE (ZUMIRANO) -- */
         .map-board { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); border-radius: 8px; padding: 8px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 100px; max-width: 220px; border: 1px solid rgba(52, 152, 219, 0.3); }
         .live-turnout { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; font-size: 13px; font-weight: bold; padding: 4px 12px; border-radius: 12px; margin-bottom: 2px; box-shadow: 0 2px 8px rgba(243, 156, 18, 0.5); white-space: nowrap; }
         .board-title { font-size: 11px; font-weight: 800; color: #1e293b; text-align: center; line-height: 1.2; text-transform: uppercase; }
@@ -27,7 +27,7 @@
             .board-title { font-size: 10px; }
         }
 
-        /* -- STILOVI ZA TAČKE (KADA JE ODZUMIRANO) -- */
+        /* -- STILOVI ZA TAČKE (ODZUMIRANO) -- */
         .single-dot { 
             position: absolute; top: 0; left: 0; width: 14px; height: 14px; background: #e74c3c; 
             border: 3px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); 
@@ -48,10 +48,10 @@
             100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
         }
 
-        /* -- NOVO: TV KAJRON (DONJI PANEL) -- */
+        /* -- AUTOMATSKI TV KAJRON (DONJI PANEL) -- */
         #kajron-container {
             position: fixed;
-            bottom: -200px; /* Sakriven ispod ekrana po defaultu */
+            bottom: -200px;
             left: 0;
             width: 100%;
             background: rgba(15, 23, 42, 0.95);
@@ -64,54 +64,49 @@
             box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
         }
         
-        #kajron-container.visible {
-            bottom: 0; /* Prikazuje se kad se doda klasa 'visible' */
-        }
+        #kajron-container.visible { bottom: 0; }
 
         .kajron-header {
-            background: #e74c3c;
-            color: white;
-            font-size: 11px;
-            font-weight: 900;
-            padding: 4px 15px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            align-self: flex-start;
+            background: #e74c3c; color: white; font-size: 11px; font-weight: 900;
+            padding: 4px 15px; letter-spacing: 2px; text-transform: uppercase;
+            display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
             border-bottom-right-radius: 10px;
         }
         
         .live-dot-small { width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: pulseWhite 1.5s infinite; }
         @keyframes pulseWhite { 0% { box-shadow: 0 0 0 0 rgba(255,255,255, 0.7); } 70% { box-shadow: 0 0 0 5px rgba(255,255,255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255, 0); } }
 
+        /* Omotač koji skriva viškove */
         .kajron-track {
+            width: 100%;
+            overflow: hidden;
+            padding: 15px 0;
+        }
+
+        /* Sama traka koja putuje */
+        .ticker-content {
             display: flex;
             gap: 12px;
-            padding: 15px 20px;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            cursor: grab;
-            user-select: none;
+            width: max-content;
+            animation: scrollTicker 45s linear infinite; /* Podešavanje brzine (45s) */
+            padding-left: 12px;
         }
-        .kajron-track:active { cursor: grabbing; }
-        .kajron-track::-webkit-scrollbar { display: none; } /* Sakriva ružan scrollbar */
+
+        /* Pauza kada se pređe mišem ili prstom! */
+        .ticker-content:hover, .ticker-content:active {
+            animation-play-state: paused;
+        }
+
+        /* Animacija pomeranja - Ide tačno za -50% širine kako bi dupliran sadržaj stvorio beskonačnu petlju */
+        @keyframes scrollTicker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
 
         .kajron-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            padding: 12px 15px;
-            min-width: 220px;
-            max-width: 220px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            transition: background 0.2s;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+            padding: 12px 15px; min-width: 220px; max-width: 220px; display: flex; flex-direction: column; gap: 6px;
         }
-        .kajron-card:hover { background: rgba(255,255,255,0.08); border-color: rgba(52, 152, 219, 0.5); }
         
         .kc-title { font-size: 12px; font-weight: 800; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
         .kc-broj { color: #e74c3c; font-weight: 900; margin-right: 5px;}
@@ -129,10 +124,13 @@
     <!-- TV KAJRON -->
     <div id="kajron-container">
         <div class="kajron-header">
-            <div class="live-dot-small"></div> IZVEŠTAJI SA BIRAČKIH MESTA
+            <div class="live-dot-small"></div> IZVEŠTAJI SA BIRAČKIH MESTA (UŽIVO)
         </div>
-        <div class="kajron-track" id="kajron-track">
-            <!-- Kartice se generišu ovde -->
+        <div class="kajron-track">
+            <!-- Traka koja putuje (sadržaj se u JS-u ubacuje 2 puta za beskonačan loop) -->
+            <div class="ticker-content" id="ticker-content">
+                <!-- Kartice se generišu ovde -->
+            </div>
         </div>
     </div>
 
@@ -158,17 +156,14 @@
                 if(data.length > 0 && data[0].geojson) {
                     var geojsonCoords = data[0].geojson.coordinates;
                     var latlngs = [];
-                    
                     if(data[0].geojson.type === "Polygon") {
                         latlngs.push(geojsonCoords[0].map(coord => [coord[1], coord[0]]));
                     } else if (data[0].geojson.type === "MultiPolygon") {
                         geojsonCoords.forEach(poly => { latlngs.push(poly[0].map(coord => [coord[1], coord[0]])); });
                     }
-                    
                     var worldBounds = [[-90, -180], [90, -180], [90, 180], [-90, 180]];
                     var maskLayers = [worldBounds];
                     latlngs.forEach(hole => maskLayers.push(hole));
-                    
                     L.polygon(maskLayers, { color: '#2980b9', weight: 3, fillOpacity: 1, fillColor: '#e5e5e5' }).addTo(map);
                 }
             });
@@ -179,20 +174,17 @@
         function renderMapAndKajron() {
             if (!globalnaMestaData) return;
 
-            // 1. UPRAVLJANJE VIDLJIVOŠĆU KAJRONA (Odzumirano = Prikazan, Zumirano = Sakriven)
             let currentZoom = map.getZoom();
             let isZoomedOut = currentZoom < 15;
             let isMobile = window.innerWidth <= 600;
 
+            // Prikaz/skrivanje kajrona
             let kajronContainer = document.getElementById('kajron-container');
-            if (isZoomedOut) {
-                kajronContainer.classList.add('visible');
-            } else {
-                kajronContainer.classList.remove('visible');
-            }
+            if (isZoomedOut) { kajronContainer.classList.add('visible'); } 
+            else { kajronContainer.classList.remove('visible'); }
 
-            // 2. AŽURIRANJE KARTICA U KAJRONU
-            let kajronTrack = document.getElementById('kajron-track');
+            // KREIRANJE BESKONAČNOG KAJRONA
+            let tickerContent = document.getElementById('ticker-content');
             let sortiranaMestaKeys = Object.keys(globalnaMestaData).sort((a,b) => parseInt(globalnaMestaData[a].broj) - parseInt(globalnaMestaData[b].broj));
             
             let kajronHtml = '';
@@ -219,16 +211,16 @@
                     </div>
                 `;
             });
-            kajronTrack.innerHTML = kajronHtml;
+            // Dupliciramo html string da bi kreirali beskonačnu petlju prilikom animacije
+            tickerContent.innerHTML = kajronHtml + kajronHtml;
 
 
-            // 3. IZRADA MAPE (TAČKE VS TABLE)
+            // CRTANJE MAPA MARКERA
             for (let id in aktivniMarkeri) map.removeLayer(aktivniMarkeri[id]);
             aktivniMarkeri = {};
 
             let grupe = [];
             const DISTANCE_THRESHOLD = 0.002; 
-
             Object.keys(globalnaMestaData).forEach(id => {
                 let m = globalnaMestaData[id];
                 let dodato = false;
@@ -241,41 +233,28 @@
                         break;
                     }
                 }
-                if (!dodato) {
-                    grupe.push({ lat: m.lat, lng: m.lng, mesta: [{...m, id: id}] });
-                }
+                if (!dodato) { grupe.push({ lat: m.lat, lng: m.lng, mesta: [{...m, id: id}] }); }
             });
 
             grupe.forEach((g, indexGroup) => {
                 let count = g.mesta.length;
 
                 if (isZoomedOut) {
-                    // ODZUMIRANO - Samo tačke
                     let clusterHtml = count > 1 ? `<div class="cluster-dot" title="Biračkih mesta: ${count}">${count}</div>` : `<div class="single-dot" title="${g.mesta[0].naziv}"></div>`;
-
                     var pinIcon = L.divIcon({ className: 'custom-transparent-icon', html: clusterHtml, iconSize: [0, 0], iconAnchor: [0, 0] });
                     var marker = L.marker([g.lat, g.lng], { icon: pinIcon }).addTo(map);
                     
-                    // Na klik zumira i automatski otvara table (a Kajron nestaje)
                     marker.on('click', () => { map.setView([g.lat, g.lng], 16, { animate: true }); });
                     aktivniMarkeri['group_' + indexGroup] = marker;
 
                 } else {
-                    // ZUMIRANO - Velike table sa spajalicama
                     g.mesta.forEach((mesto, index) => {
                         let angle, distance;
                         let baseDistance = isMobile ? 50 : 80;
 
-                        if (count === 1) {
-                            angle = -Math.PI / 2;
-                            distance = isMobile ? 40 : 60;
-                        } else if (count === 2) {
-                            angle = (index === 0) ? -Math.PI/4 : -3*Math.PI/4;
-                            distance = baseDistance + 10;
-                        } else {
-                            angle = (index / count) * 2 * Math.PI - (Math.PI / 2);
-                            distance = baseDistance + (count * 10);
-                        }
+                        if (count === 1) { angle = -Math.PI / 2; distance = isMobile ? 40 : 60; } 
+                        else if (count === 2) { angle = (index === 0) ? -Math.PI/4 : -3*Math.PI/4; distance = baseDistance + 10; } 
+                        else { angle = (index / count) * 2 * Math.PI - (Math.PI / 2); distance = baseDistance + (count * 10); }
 
                         let offsetX = Math.cos(angle) * distance;
                         let offsetY = Math.sin(angle) * distance;
@@ -310,31 +289,13 @@
             });
         }
 
-        // SLUŠAČI DOGAĐAJA
         onValue(mestaRef, (snapshot) => {
             globalnaMestaData = snapshot.val();
             renderMapAndKajron();
         });
 
-        // Prati zumiranje da bi osvežio elemente i sakrio/prikazao Kajron
         map.on('zoomend', renderMapAndKajron);
         window.addEventListener('resize', renderMapAndKajron);
-
-        // Omogućava "Prevlačenje mišem" (Drag to scroll) za Kajron na računarima
-        window.addEventListener('load', () => {
-            let slider = document.getElementById('kajron-track');
-            let isDown = false, startX, scrollLeft;
-            slider.addEventListener('mousedown', (e) => { isDown = true; startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft; });
-            slider.addEventListener('mouseleave', () => isDown = false);
-            slider.addEventListener('mouseup', () => isDown = false);
-            slider.addEventListener('mousemove', (e) => {
-                if(!isDown) return;
-                e.preventDefault();
-                let x = e.pageX - slider.offsetLeft;
-                slider.scrollLeft = scrollLeft - (x - startX) * 2;
-            });
-            slider.addEventListener('wheel', (e) => { if(e.deltaY !== 0) { e.preventDefault(); slider.scrollLeft += e.deltaY; } });
-        });
 
     </script>
 </body>
