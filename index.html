@@ -9,26 +9,25 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
     
     <style>
-        html, body { margin: 0; padding: 0; height: 100%; width: 100%; font-family: -apple-system, sans-serif; overflow: hidden; background: #e5e5e5; }
+        html, body { margin: 0; padding: 0; height: 100%; width: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow: hidden; background: #e5e5e5; }
         
         #map { width: 100%; height: 100vh; background: #e5e5e5; }
         
         .custom-transparent-icon { background: transparent !important; border: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
         
-        /* -- STILOVI ZA DETALJNE TABLE (ZUMIRANO) -- */
+        /* -- STILOVI ZA DETALJNE TABLE (KADA JE ZUMIRANO) -- */
         .map-board { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); border-radius: 8px; padding: 8px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 100px; max-width: 220px; border: 1px solid rgba(52, 152, 219, 0.3); }
         .live-turnout { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; font-size: 13px; font-weight: bold; padding: 4px 12px; border-radius: 12px; margin-bottom: 2px; box-shadow: 0 2px 8px rgba(243, 156, 18, 0.5); white-space: nowrap; }
         .board-title { font-size: 11px; font-weight: 800; color: #1e293b; text-align: center; line-height: 1.2; text-transform: uppercase; }
         .board-number { font-size: 10px; color: #ef4444; font-weight: 700; background: #fee2e2; padding: 2px 8px; border-radius: 12px; text-transform: uppercase; margin-top: 2px;}
 
-        /* Prilagođavanje za male ekrane telefona */
         @media (max-width: 600px) {
             .map-board { padding: 6px 10px; max-width: 160px; }
             .live-turnout { font-size: 11px; padding: 3px 8px; }
             .board-title { font-size: 10px; }
         }
 
-        /* -- STILOVI ZA TAČKE/KLASTERE (ODZUMIRANO) -- */
+        /* -- STILOVI ZA TAČKE (KADA JE ODZUMIRANO) -- */
         .single-dot { 
             position: absolute; top: 0; left: 0; width: 14px; height: 14px; background: #e74c3c; 
             border: 3px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); 
@@ -48,11 +47,94 @@
             70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
             100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
         }
+
+        /* -- NOVO: TV KAJRON (DONJI PANEL) -- */
+        #kajron-container {
+            position: fixed;
+            bottom: -200px; /* Sakriven ispod ekrana po defaultu */
+            left: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(15px);
+            border-top: 3px solid #e74c3c;
+            z-index: 4000;
+            transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+        }
+        
+        #kajron-container.visible {
+            bottom: 0; /* Prikazuje se kad se doda klasa 'visible' */
+        }
+
+        .kajron-header {
+            background: #e74c3c;
+            color: white;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 4px 15px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            align-self: flex-start;
+            border-bottom-right-radius: 10px;
+        }
+        
+        .live-dot-small { width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: pulseWhite 1.5s infinite; }
+        @keyframes pulseWhite { 0% { box-shadow: 0 0 0 0 rgba(255,255,255, 0.7); } 70% { box-shadow: 0 0 0 5px rgba(255,255,255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255, 0); } }
+
+        .kajron-track {
+            display: flex;
+            gap: 12px;
+            padding: 15px 20px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            cursor: grab;
+            user-select: none;
+        }
+        .kajron-track:active { cursor: grabbing; }
+        .kajron-track::-webkit-scrollbar { display: none; } /* Sakriva ružan scrollbar */
+
+        .kajron-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 12px 15px;
+            min-width: 220px;
+            max-width: 220px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        .kajron-card:hover { background: rgba(255,255,255,0.08); border-color: rgba(52, 152, 219, 0.5); }
+        
+        .kc-title { font-size: 12px; font-weight: 800; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
+        .kc-broj { color: #e74c3c; font-weight: 900; margin-right: 5px;}
+        .kc-data { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+        .kc-perc { font-size: 22px; font-weight: 900; color: #f39c12; line-height: 1; }
+        .kc-label { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
+        .kc-stats { display: flex; justify-content: space-between; font-size: 10px; color: #a0aec0; margin-top: 2px; }
+        .kc-stats strong { color: white; }
     </style>
 </head>
 <body>
 
     <div id="map"></div>
+
+    <!-- TV KAJRON -->
+    <div id="kajron-container">
+        <div class="kajron-header">
+            <div class="live-dot-small"></div> IZVEŠTAJI SA BIRAČKIH MESTA
+        </div>
+        <div class="kajron-track" id="kajron-track">
+            <!-- Kartice se generišu ovde -->
+        </div>
+    </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script type="module">
@@ -64,12 +146,12 @@
         const db = getDatabase(app);
         const mestaRef = ref(db, 'biracka_mesta');
 
-        // Kreiranje mape (Inicijalni zoom stavljen na 12 da se vidi cela opština kao tačke)
-        var map = L.map('map', { zoomControl: false }).setView([43.0186, 22.7447], 12);
+        // Kreiranje mape
+        var map = L.map('map', { zoomControl: false, attributionControl: false }).setView([43.0186, 22.7447], 12);
         L.control.zoom({ position: 'topleft' }).addTo(map);
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
-        // ZATAMNJIVANJE TERITORIJE VAN OPŠTINE
+        // ZATAMNJIVANJE TERITORIJE (Ostrvo Dimitrovgrad)
         fetch('https://nominatim.openstreetmap.org/search?q=Op%C5%A1tina+Dimitrovgrad,+Serbia&format=json&polygon_geojson=1&limit=1')
             .then(response => response.json())
             .then(data => {
@@ -94,20 +176,56 @@
         var aktivniMarkeri = {};
         var globalnaMestaData = null;
 
-        // FUNKCIJA KOJA ODLUČUJE ŠTA DA CRTA NA OSNOVU ZUMA
-        function renderMap() {
+        function renderMapAndKajron() {
             if (!globalnaMestaData) return;
 
-            // Obriši sve prethodne markere sa mape
-            for (let id in aktivniMarkeri) map.removeLayer(aktivniMarkeri[id]);
-            aktivniMarkeri = {};
-
+            // 1. UPRAVLJANJE VIDLJIVOŠĆU KAJRONA (Odzumirano = Prikazan, Zumirano = Sakriven)
             let currentZoom = map.getZoom();
-            // Granica: Ako je zoom manji od 15, prikazuj samo tačke (klastere)
             let isZoomedOut = currentZoom < 15;
             let isMobile = window.innerWidth <= 600;
 
-            // Grupisanje mesta koja su na istim zgradama (udaljenost < ~200m)
+            let kajronContainer = document.getElementById('kajron-container');
+            if (isZoomedOut) {
+                kajronContainer.classList.add('visible');
+            } else {
+                kajronContainer.classList.remove('visible');
+            }
+
+            // 2. AŽURIRANJE KARTICA U KAJRONU
+            let kajronTrack = document.getElementById('kajron-track');
+            let sortiranaMestaKeys = Object.keys(globalnaMestaData).sort((a,b) => parseInt(globalnaMestaData[a].broj) - parseInt(globalnaMestaData[b].broj));
+            
+            let kajronHtml = '';
+            sortiranaMestaKeys.forEach(id => {
+                let m = globalnaMestaData[id];
+                let u = m.ukupan_broj || 0; 
+                let i = m.izaslo || 0;
+                let procenat = u > 0 ? ((i / u) * 100).toFixed(1) : 0;
+                let vremeTxt = m.vreme_update ? m.vreme_update + 'h' : '--:--';
+
+                kajronHtml += `
+                    <div class="kajron-card">
+                        <div class="kc-title"><span class="kc-broj">${m.broj}.</span> ${m.naziv}</div>
+                        <div class="kc-data">
+                            <div>
+                                <div class="kc-label">Izlaznost</div>
+                                <div class="kc-perc">${procenat}%</div>
+                            </div>
+                        </div>
+                        <div class="kc-stats">
+                            <span>Glasalo: <strong>${i} / ${u}</strong></span>
+                            <span>Presek: <strong>${vremeTxt}</strong></span>
+                        </div>
+                    </div>
+                `;
+            });
+            kajronTrack.innerHTML = kajronHtml;
+
+
+            // 3. IZRADA MAPE (TAČKE VS TABLE)
+            for (let id in aktivniMarkeri) map.removeLayer(aktivniMarkeri[id]);
+            aktivniMarkeri = {};
+
             let grupe = [];
             const DISTANCE_THRESHOLD = 0.002; 
 
@@ -128,43 +246,34 @@
                 }
             });
 
-            // CRTANJE GRUPA
             grupe.forEach((g, indexGroup) => {
                 let count = g.mesta.length;
 
                 if (isZoomedOut) {
-                    // POGLED ODZUMIRANO (Samo tačke i brojevi)
-                    let clusterHtml = '';
-                    if (count > 1) {
-                        clusterHtml = `<div class="cluster-dot" title="Biračkih mesta: ${count}">${count}</div>`;
-                    } else {
-                        clusterHtml = `<div class="single-dot" title="${g.mesta[0].naziv}"></div>`;
-                    }
+                    // ODZUMIRANO - Samo tačke
+                    let clusterHtml = count > 1 ? `<div class="cluster-dot" title="Biračkih mesta: ${count}">${count}</div>` : `<div class="single-dot" title="${g.mesta[0].naziv}"></div>`;
 
                     var pinIcon = L.divIcon({ className: 'custom-transparent-icon', html: clusterHtml, iconSize: [0, 0], iconAnchor: [0, 0] });
                     var marker = L.marker([g.lat, g.lng], { icon: pinIcon }).addTo(map);
                     
-                    // Klik na tačku automatski zumira kameru da otvori detalje
-                    marker.on('click', () => {
-                        map.setView([g.lat, g.lng], 15, { animate: true });
-                    });
-                    
+                    // Na klik zumira i automatski otvara table (a Kajron nestaje)
+                    marker.on('click', () => { map.setView([g.lat, g.lng], 16, { animate: true }); });
                     aktivniMarkeri['group_' + indexGroup] = marker;
 
                 } else {
-                    // POGLED ZUMIRANO (Eksplozija, pune table, isprekidane linije)
+                    // ZUMIRANO - Velike table sa spajalicama
                     g.mesta.forEach((mesto, index) => {
                         let angle, distance;
-                        let baseDistance = isMobile ? 50 : 80; // Na telefonu drži table bliže centru
+                        let baseDistance = isMobile ? 50 : 80;
 
                         if (count === 1) {
-                            angle = -Math.PI / 2; // Ravno gore
+                            angle = -Math.PI / 2;
                             distance = isMobile ? 40 : 60;
                         } else if (count === 2) {
-                            angle = (index === 0) ? -Math.PI/4 : -3*Math.PI/4; // "V" oblik za 2 mesta
+                            angle = (index === 0) ? -Math.PI/4 : -3*Math.PI/4;
                             distance = baseDistance + 10;
                         } else {
-                            angle = (index / count) * 2 * Math.PI - (Math.PI / 2); // Lepeza ukrug
+                            angle = (index / count) * 2 * Math.PI - (Math.PI / 2);
                             distance = baseDistance + (count * 10);
                         }
 
@@ -180,14 +289,11 @@
 
                         let pinHtml = `
                             <div style="position: relative; width: 0; height: 0; overflow: visible;">
-                                
                                 <svg style="position: absolute; top: -300px; left: -300px; width: 600px; height: 600px; z-index: 998; pointer-events: none;">
                                     <line x1="300" y1="300" x2="${300 + offsetX}" y2="${300 + offsetY}" stroke="#3498db" stroke-width="2.5" stroke-dasharray="5,5"/>
                                     <circle cx="${300 + offsetX}" cy="${300 + offsetY}" r="3" fill="#3498db" />
                                 </svg>
-
                                 <div style="position: absolute; top: 0; left: 0; width: 12px; height: 12px; background: #e74c3c; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); z-index: 999; box-shadow: 0 0 10px rgba(231, 76, 60, 0.8);"></div>
-
                                 <div class="map-board" style="position: absolute; top: ${offsetY}px; left: ${offsetX}px; transform: translate(-50%, -50%); z-index: 1000; filter: drop-shadow(0 8px 15px rgba(0,0,0,0.25));">
                                     ${izlaznostHtml}
                                     <span class="board-title">${mesto.naziv}</span>
@@ -196,25 +302,39 @@
                             </div>
                         `;
 
-                        var pinIcon = L.divIcon({ className: 'custom-transparent-icon', html: pinHtml, iconSize: [0, 0], iconAnchor: [0, 0] });
-                        var marker = L.marker([mesto.lat, mesto.lng], { icon: pinIcon }).addTo(map);
+                        var markerIcon = L.divIcon({ className: 'custom-transparent-icon', html: pinHtml, iconSize: [0, 0], iconAnchor: [0, 0] });
+                        var marker = L.marker([mesto.lat, mesto.lng], { icon: markerIcon }).addTo(map);
                         aktivniMarkeri[mesto.id] = marker;
                     });
                 }
             });
         }
 
-        // Pratimo izmene iz baze
+        // SLUŠAČI DOGAĐAJA
         onValue(mestaRef, (snapshot) => {
             globalnaMestaData = snapshot.val();
-            renderMap();
+            renderMapAndKajron();
         });
 
-        // Pratimo kada korisnik zumira in/out da bismo osvežili izgled
-        map.on('zoomend', renderMap);
-        
-        // Opciono: osveži pri rotaciji telefona
-        window.addEventListener('resize', renderMap);
+        // Prati zumiranje da bi osvežio elemente i sakrio/prikazao Kajron
+        map.on('zoomend', renderMapAndKajron);
+        window.addEventListener('resize', renderMapAndKajron);
+
+        // Omogućava "Prevlačenje mišem" (Drag to scroll) za Kajron na računarima
+        window.addEventListener('load', () => {
+            let slider = document.getElementById('kajron-track');
+            let isDown = false, startX, scrollLeft;
+            slider.addEventListener('mousedown', (e) => { isDown = true; startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft; });
+            slider.addEventListener('mouseleave', () => isDown = false);
+            slider.addEventListener('mouseup', () => isDown = false);
+            slider.addEventListener('mousemove', (e) => {
+                if(!isDown) return;
+                e.preventDefault();
+                let x = e.pageX - slider.offsetLeft;
+                slider.scrollLeft = scrollLeft - (x - startX) * 2;
+            });
+            slider.addEventListener('wheel', (e) => { if(e.deltaY !== 0) { e.preventDefault(); slider.scrollLeft += e.deltaY; } });
+        });
 
     </script>
 </body>
